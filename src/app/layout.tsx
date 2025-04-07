@@ -87,6 +87,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href={logoPath} sizes="any" />
+        <meta name="google-site-verification" content="xgZR0c3YvTHe9t68xMEPrR4EjCkedhRvobbJmEYMevw" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <AuthProvider>
