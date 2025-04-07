@@ -7,6 +7,7 @@ import "./globals.css";
 import AuthProvider from '@/components/AuthProvider';
 import { Toaster } from "react-hot-toast";
 import AuthSuccess from '@/components/AuthSuccess';
+import { getImagePath } from "@/lib/utils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +18,9 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+// Define logo path once
+const logoPath = getImagePath("/mcp-server-directory.png");
 
 export const metadata: Metadata = {
   title: "MCP Server Directory | Find & Share Model Context Protocol Servers",
@@ -32,7 +36,7 @@ export const metadata: Metadata = {
     siteName: "MCP Server Directory",
     images: [
       {
-        url: "/mcp-server-directory.png",
+        url: logoPath,
         width: 478,
         height: 480,
         alt: "MCP Server Directory Logo",
@@ -43,7 +47,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MCP Server Directory | Find & Share Model Context Protocol Servers",
     description: "Browse, search, and submit Model Context Protocol servers. The definitive MCP server directory.",
-    images: ["/mcp-server-directory.png"],
+    images: [logoPath],
   },
   robots: {
     index: true,
@@ -55,20 +59,20 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/mcp-server-directory.png", sizes: "478x480" },
-      { url: "/mcp-server-directory.png", sizes: "192x192" },
-      { url: "/mcp-server-directory.png", sizes: "128x128" },
+      { url: logoPath, sizes: "478x480" },
+      { url: logoPath, sizes: "192x192" },
+      { url: logoPath, sizes: "128x128" },
     ],
-    shortcut: "/mcp-server-directory.png",
+    shortcut: logoPath,
     apple: [
-      { url: "/mcp-server-directory.png", sizes: "180x180" },
-      { url: "/mcp-server-directory.png", sizes: "152x152" },
-      { url: "/mcp-server-directory.png", sizes: "120x120" },
+      { url: logoPath, sizes: "180x180" },
+      { url: logoPath, sizes: "152x152" },
+      { url: logoPath, sizes: "120x120" },
     ],
     other: [
       {
         rel: "apple-touch-icon-precomposed",
-        url: "/mcp-server-directory.png",
+        url: logoPath,
       },
     ],
   },
@@ -82,7 +86,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/mcp-server-directory.png" sizes="any" />
+        <link rel="icon" href={logoPath} sizes="any" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <AuthProvider>

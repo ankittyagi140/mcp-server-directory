@@ -17,6 +17,9 @@ const nextConfig: NextConfig = {
       'xmfcfqpkkvtekljidvfh.supabase.in', // Alternative Supabase domain
     ],
   },
+  // Add base path and asset prefix for proper static asset loading
+  basePath: '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_SITE_URL : '',
 };
 
 export default nextConfig;

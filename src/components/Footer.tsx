@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { getImagePath } from "@/lib/utils";
 
 export default function Footer() {
   return (
@@ -10,7 +11,13 @@ export default function Footer() {
         <div className="mb-6 pb-6 border-b">
           <div className="flex items-start gap-4 max-w-xl">
             <div className="p-2 rounded-lg">
-            <Image src="/mcp-server-directory.png" alt="MCP Server Directory" width={48} height={48} />
+              <Image 
+                src={getImagePath("/mcp-server-directory.png")} 
+                alt="MCP Server Directory" 
+                width={48} 
+                height={48} 
+                unoptimized
+              />
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">MCP Server Directory</h3>

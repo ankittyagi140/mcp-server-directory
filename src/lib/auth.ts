@@ -11,13 +11,30 @@ export interface AuthSession {
   isLoading: boolean;
 }
 
+// Get site URL - use environment variable in production or window.location.origin in development
+const getSiteUrl = () => {
+  // In server context
+  if (typeof window === 'undefined') {
+    // Use explicit environment detection
+    return process.env.NODE_ENV === 'production' 
+      ? process.env.NEXT_PUBLIC_SITE_URL || ''
+      : 'http://localhost:3000';
+  }
+  
+  // In browser context - use production URL if set and in production mode, otherwise use current origin
+  return process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_SITE_URL
+    ? process.env.NEXT_PUBLIC_SITE_URL
+    : window.location.origin;
+};
+
 // Functions for authentication
 export const signInWithGoogle = async (redirectTo?: string) => {
   try {
+    const siteUrl = getSiteUrl();
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`,
+        redirectTo: `${siteUrl}/auth/callback${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`,
       }
     });
     
@@ -31,10 +48,11 @@ export const signInWithGoogle = async (redirectTo?: string) => {
 
 export const signInWithGitHub = async (redirectTo?: string) => {
   try {
+    const siteUrl = getSiteUrl();
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`,
+        redirectTo: `${siteUrl}/auth/callback${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`,
       }
     });
     
@@ -72,8 +90,9 @@ export const signOut = async () => {
  */
 export async function resetPassword(email: string) {
   try {
+    const siteUrl = getSiteUrl();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${siteUrl}/reset-password`,
     });
     
     if (error) {
