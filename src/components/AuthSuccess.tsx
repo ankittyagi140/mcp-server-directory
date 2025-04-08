@@ -20,10 +20,16 @@ export default function AuthSuccess() {
       // Replace URL without the query parameter
       window.history.replaceState({}, document.title, window.location.pathname);
       
-      // Show toast only for successful login and when user exists
+      // Show toast only for successful login when auth exchange is complete
+      // and when user exists, but skip if we're in the middle of OAuth flow
       if (auth === "success" && user && !toastShownRef.current) {
-        toast.success("Signed in successfully!");
-        toastShownRef.current = true;
+        // Only show the toast if we're not in the middle of an OAuth flow
+        // Check if there's no 'code' parameter, which would indicate an OAuth redirect
+        const hasOAuthCode = window.location.href.includes('code=');
+        if (!hasOAuthCode) {
+          toast.success("Signed in successfully!");
+          toastShownRef.current = true;
+        }
       }
     }
   }, [searchParams, user]);
@@ -38,7 +44,11 @@ export default function AuthSuccess() {
 
     // Only show success toast when user changes from null to a value (login)
     // And only show it once per session, and there's no auth param (handled separately)
-    if (!isLoading && user && !prevUserRef.current && !toastShownRef.current && !searchParams.get("auth")) {
+    // And ensure we're not in an OAuth flow (when a user has just clicked the button)
+    const hasOAuthCode = window.location.href.includes('code=');
+    
+    if (!isLoading && user && !prevUserRef.current && !toastShownRef.current && 
+        !searchParams.get("auth") && !hasOAuthCode) {
       toast.success("Signed in successfully!");
       toastShownRef.current = true; // Prevent showing again
     }

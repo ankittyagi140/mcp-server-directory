@@ -126,47 +126,47 @@ export default function FaqSection({ hideTitle = false }: FaqSectionProps) {
   };
 
   return (
-    <section className="w-full py-12 md:py-16 lg:py-20 border-t">
+    <section className="w-full py-8 sm:py-12 md:py-16 lg:py-20 border-t">
       <div className="container px-4 md:px-6">
         {!hideTitle && (
-          <div className="mb-10 flex flex-col items-center text-center">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+          <div className="mb-6 sm:mb-10 flex flex-col items-center text-center">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter">
               FAQ
             </h2>
-            <p className="mt-4 max-w-[700px] text-muted-foreground md:text-xl">
+            <p className="mt-2 sm:mt-4 max-w-[700px] text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground">
               Frequently Asked Questions about MCP Servers
             </p>
           </div>
         )}
 
-        <div className="mx-auto max-w-3xl space-y-4">
+        <div className="mx-auto max-w-3xl space-y-3 sm:space-y-4">
           {faqItems.map((item) => (
             <div
               key={item.id}
               className="rounded-lg border border-border transition-all"
             >
               <button
-                className="flex w-full items-center justify-between p-4 text-left font-medium"
+                className="flex w-full items-center justify-between p-3 sm:p-4 text-left text-sm sm:text-base font-medium"
                 onClick={() => toggleItem(item.id)}
                 aria-expanded={openItems.has(item.id)}
                 aria-controls={`faq-content-${item.id}`}
               >
                 <span className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                  <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
                     {item.id}
                   </span>
                   {item.question}
                 </span>
                 {openItems.has(item.id) ? (
-                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                  <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                 ) : (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                 )}
               </button>
               {openItems.has(item.id) && (
                 <div
                   id={`faq-content-${item.id}`}
-                  className="border-t px-4 py-3 text-muted-foreground"
+                  className="border-t px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-muted-foreground"
                 >
                   {item.answer}
                 </div>

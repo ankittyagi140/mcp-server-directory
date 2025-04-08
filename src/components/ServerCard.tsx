@@ -1,5 +1,5 @@
 "use client";
-
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ExternalLink, Github, Server } from "lucide-react";
@@ -14,11 +14,11 @@ export default function ServerCard({ server }: ServerCardProps) {
   const [imageError, setImageError] = useState(false);
   
   // Ensure tags is always an array
-  const tags: string[] = Array.isArray(server.tags) 
-    ? server.tags 
-    : typeof server.tags === 'string' 
-      ? (server.tags as string).split(',').map((tag: string) => tag.trim()) 
-      : [];
+  const tags: string[] = Array.isArray(server.tags)
+  ? server.tags
+  : typeof server.tags === 'string'
+    ? JSON.parse(server.tags)
+    : [];
 
   return (
     <div className="flex flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow transition-all hover:shadow-md">
@@ -55,19 +55,14 @@ export default function ServerCard({ server }: ServerCardProps) {
         </p>
       </div>
       <div className="mt-2 flex flex-wrap gap-2 px-6 py-2">
-        {tags.slice(0, 3).map((tag: string) => (
+        {tags.map((tag: string) => (
           <span
             key={tag}
-            className="inline-flex items-center text-xs font-medium text-blue-600 px-1"
+            className="inline-flex items-center text-xs font-medium text-green-600 px-1"
           >
-            [{tag}]
+            #{tag}
           </span>
         ))}
-        {tags.length > 3 && (
-          <span className="inline-flex items-center text-xs font-medium text-gray-500">
-            +{tags.length - 3}
-          </span>
-        )}
       </div>
       <div className="flex items-center justify-between border-t p-6">
         <Link

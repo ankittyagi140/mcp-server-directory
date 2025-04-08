@@ -17,13 +17,13 @@ function normalizeArrayData(data: Omit<ServerEntry, 'tags' | 'features'> & {
     tags: Array.isArray(data.tags) 
       ? data.tags 
       : typeof data.tags === 'string' 
-        ? data.tags.split(',').map((tag: string) => tag.trim()) 
+        ? JSON.parse(data.tags)
         : [],
     features: Array.isArray(data.features) 
       ? data.features 
       : typeof data.features === 'string' 
-        ? data.features.split(',').map((feature: string) => feature.trim()) 
-        : [],
+          ? JSON.parse(data.features)
+          : [],
   };
 }
 
@@ -37,7 +37,6 @@ async function getServer(id: string) {
       .eq("id", id)
       .eq("status", "approved")
       .single();
-
     if (error || !data) {
       console.error("Error fetching server:", error);
       return null;
@@ -109,7 +108,7 @@ export default async function ServerDetailPage({ params }: Props) {
   if (!server) {
     notFound();
   }
-  
+
   // Create structured data for the server
   const structuredData = {
     "@context": "https://schema.org",
@@ -178,12 +177,12 @@ export default async function ServerDetailPage({ params }: Props) {
               <div className="text-center sm:text-left">
                 <h1 className="text-2xl md:text-3xl font-bold">{server.name}</h1>
                 <div className="mt-2 flex flex-wrap justify-center sm:justify-start gap-2">
-                  {server.tags.map((tag) => (
+                  {server.tags.map((tag: string) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center text-xs font-medium text-blue-600 px-1"
+                      className="inline-flex items-center text-xs font-medium text-green-600 px-1"
                     >
-                      [{tag}]
+                      #{tag}
                     </span>
                   ))}
                 </div>

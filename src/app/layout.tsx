@@ -93,7 +93,7 @@ export default function RootLayout({
         <AuthProvider>
           <div className="flex min-h-screen flex-col">
             <Navbar />
-            <main className="flex-1">
+            <main className="flex-1 min-h-screen">
               {children}
             </main>
             <Footer />

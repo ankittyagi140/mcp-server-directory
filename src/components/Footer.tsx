@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getImagePath } from "@/lib/utils";
+import { Github, Twitter, Mail } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -29,26 +30,57 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center gap-3">
-           
-            <p className="text-center text-sm text-muted-foreground md:text-left">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          {/* Copyright */}
+          <div>
+            <p className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} www.mcp-server-directory.com. All rights reserved.
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="/about" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              About
-            </Link>
-            {/* <Link href="/terms" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              Terms
-            </Link>
-            <Link href="/privacy" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              Privacy
-            </Link> */}
-            <Link href="https://github.com/atyagi/mcp-server-directory" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              GitHub
-            </Link>
+          
+          <div className="flex items-center gap-8">
+            {/* Navigation Links */}
+            <div className="flex items-center gap-4">
+              <Link href="/about" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                About
+              </Link>
+              <Link href="/terms" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Terms
+              </Link>
+              <Link href="/privacy" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Privacy
+              </Link>
+            </div>
+            
+            {/* Socials */}
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-medium text-muted-foreground mr-2">Socials</span>
+              <a 
+                href="https://github.com/ankittyagi140/mcp-server-directory" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                aria-label="GitHub"
+              >
+                <Github className="h-5 w-5" />
+              </a>
+              <a 
+                href="https://x.com/mcpserverdir" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                aria-label="Twitter"
+              >
+                <Twitter className="h-5 w-5" />
+              </a>
+              <a 
+                href="mailto:mcpserverdirectory@gmail.com" 
+                className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                aria-label="Email"
+              >
+                <Mail className="h-5 w-5" />
+              </a>
+            </div>
           </div>
         </div>
       </div>

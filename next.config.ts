@@ -3,18 +3,51 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: [
-      'example.com',
-      'raw.githubusercontent.com',
-      'github.com',
-      'avatars.githubusercontent.com',
-      'cdn.example.com',
-      'images.unsplash.com',
-      'storage.googleapis.com',
-      'lh3.googleusercontent.com',
-      's3.amazonaws.com',
-      'xmfcfqpkkvtekljidvfh.supabase.co', // Your Supabase instance
-      'xmfcfqpkkvtekljidvfh.supabase.in', // Alternative Supabase domain
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'example.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'github.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.example.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 's3.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'xmfcfqpkkvtekljidvfh.supabase.co', // Your Supabase instance
+      },
+      {
+        protocol: 'https',
+        hostname: 'xmfcfqpkkvtekljidvfh.supabase.in', // Alternative Supabase domain
+      },
     ],
   },
   // Add base path and asset prefix for proper static asset loading

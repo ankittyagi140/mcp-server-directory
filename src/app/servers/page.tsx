@@ -3,10 +3,12 @@ import ServerCard from "@/components/ServerCard";
 import { supabase } from "@/lib/supabase";
 import type { ServerEntry } from "@/lib/supabase";
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import PaginationControls from "@/components/PaginationControls";
 
 // Export metadata for SEO
 export const metadata: Metadata = {
-  title: "MCP Servers Directory | Browse Model Context Protocol Servers",
+  title: "MCP Server Directory | Browse Model Context Protocol Servers",
   description: "Discover and explore Model Context Protocol (MCP) servers with search, filtering by tags, and detailed server information. The most comprehensive MCP server list.",
   keywords: ["MCP servers", "Model Context Protocol", "MCP directory", "Claude integration", "AI tools", "server listings", "MCP implementations"],
   openGraph: {
@@ -16,23 +18,74 @@ export const metadata: Metadata = {
   },
 };
 
-async function getServers() {
-  const { data, error } = await supabase
+// Default pagination values
+const DEFAULT_PAGE_SIZE = 9;
+const DEFAULT_PAGE = 1;
+
+async function getServers(page: number = DEFAULT_PAGE, pageSize: number = DEFAULT_PAGE_SIZE) {
+  // Calculate offset
+  const offset = (page - 1) * pageSize;
+
+  // Get servers with pagination
+  const { data, error, count } = await supabase
     .from("servers")
-    .select("*")
+    .select("*", { count: "exact" })
     .eq("status", "approved")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(offset, offset + pageSize - 1);
 
   if (error) {
     console.error("Error fetching servers:", error);
-    return [];
+    return { servers: [], count: 0 };
   }
 
-  return data as ServerEntry[];
+  return { 
+    servers: data as ServerEntry[],
+    count: count || 0
+  };
 }
 
-export default async function ServersPage() {
-  const servers = await getServers();
+interface Props {
+  searchParams: Promise<{ 
+    page?: string | string[];
+    pageSize?: string | string[];
+  }>;
+}
+
+export default async function ServersPage({ searchParams }: Props) {
+  // Safely access params
+  const params = await searchParams;
+  
+  // Extract and convert pagination parameters
+  let page = DEFAULT_PAGE;
+  let pageSize = DEFAULT_PAGE_SIZE;
+  
+  // Process page parameter if it exists
+  if (params.page) {
+    const pageValue = Array.isArray(params.page) ? params.page[0] : params.page;
+    const parsedPage = parseInt(pageValue, 10);
+    if (!isNaN(parsedPage) && parsedPage > 0) {
+      page = parsedPage;
+    }
+  }
+  
+  // Process pageSize parameter if it exists
+  if (params.pageSize) {
+    const pageSizeValue = Array.isArray(params.pageSize) ? params.pageSize[0] : params.pageSize;
+    const parsedPageSize = parseInt(pageSizeValue, 10);
+    if (!isNaN(parsedPageSize) && parsedPageSize > 0) {
+      pageSize = parsedPageSize;
+    }
+  }
+
+  // Fetch servers with pagination
+  const { servers, count } = await getServers(page, pageSize);
+  
+  // Calculate total pages
+  const totalPages = Math.max(1, Math.ceil(count / pageSize));
+
+  // Generate base URL for pagination
+  const baseUrl = "/servers";
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -60,11 +113,31 @@ export default async function ServersPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {servers.map((server) => (
-              <ServerCard key={server.id} server={server} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {servers.map((server) => (
+                <ServerCard key={server.id} server={server} />
+              ))}
+            </div>
+            
+            {/* Pagination display and controls */}
+            <div className="mt-8 flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
+              <div className="text-sm text-muted-foreground">
+                Showing <span className="font-medium">{Math.min((page - 1) * pageSize + 1, count)}</span> to{" "}
+                <span className="font-medium">{Math.min(page * pageSize, count)}</span> of{" "}
+                <span className="font-medium">{count}</span> servers
+              </div>
+              
+              <Suspense fallback={<div>Loading pagination...</div>}>
+                <PaginationControls 
+                  currentPage={page}
+                  totalPages={totalPages}
+                  pageSize={pageSize}
+                  basePath={baseUrl}
+                />
+              </Suspense>
+            </div>
+          </>
         )}
       </div>
     </div>

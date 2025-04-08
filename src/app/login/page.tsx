@@ -10,18 +10,20 @@ export const metadata: Metadata = {
 // Loading fallback for the login form
 function LoginFormLoading() {
   return (
-    <div className="p-4 md:p-6 flex justify-center items-center">
-      <div className="h-6 w-6 md:h-8 md:w-8 animate-spin rounded-full border-b-2 border-green-600"></div>
-      <span className="ml-3 text-sm md:text-base">Loading sign in options...</span>
+    <div className="p-5 md:p-7 flex justify-center items-center min-h-[150px] md:min-h-[180px]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-8 w-8 md:h-10 md:w-10 animate-spin rounded-full border-3 border-gray-200 border-t-green-600"></div>
+        <span className="text-sm md:text-base text-gray-600">Loading sign in options...</span>
+      </div>
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="container mx-auto flex items-center justify-center px-4 py-8 md:py-12 min-h-[calc(100vh-200px)]">
+    <div className="container mx-auto flex items-center justify-center px-4 py-10 md:py-16 min-h-[calc(100vh-200px)]">
       <div className="w-full max-w-sm md:max-w-md">
-        <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-md">
           <Suspense fallback={<LoginFormLoading />}>
             <LoginForm />
           </Suspense>
