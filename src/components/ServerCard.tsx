@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ExternalLink, Github, Server } from "lucide-react";
 import type { ServerEntry } from "@/lib/supabase";
 import { useState } from "react";
+import { generateSlug } from "@/lib/supabase";
 
 interface ServerCardProps {
   server: ServerEntry;
@@ -13,6 +14,9 @@ interface ServerCardProps {
 export default function ServerCard({ server }: ServerCardProps) {
   const [imageError, setImageError] = useState(false);
   
+  // Generate the slug from the server name
+  const serverSlug = generateSlug(server.name);
+
   // Ensure tags is always an array
   const tags: string[] = Array.isArray(server.tags)
   ? server.tags
@@ -41,7 +45,7 @@ export default function ServerCard({ server }: ServerCardProps) {
           )}
           <div>
             <Link
-              href={`/servers/${server.id}`}
+              href={`/servers/${serverSlug}`}
               className="font-medium hover:underline"
             >
               {server.name}
@@ -66,7 +70,7 @@ export default function ServerCard({ server }: ServerCardProps) {
       </div>
       <div className="flex items-center justify-between border-t p-6">
         <Link
-          href={`/servers/${server.id}`}
+          href={`/servers/${serverSlug}`}
           className="text-sm font-medium hover:underline"
         >
           View Details

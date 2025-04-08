@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ExternalLink, Github, Mail, Server } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, getServerBySlug, generateSlug } from "@/lib/supabase";
 import type { ServerEntry } from "@/lib/supabase";
 import type { Metadata } from "next";
 import Script from "next/script";
@@ -27,44 +27,56 @@ function normalizeArrayData(data: Omit<ServerEntry, 'tags' | 'features'> & {
   };
 }
 
-async function getServer(id: string) {
-  if (!id) return null;
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+// Helper to get server by ID or slug
+async function getServerByIdOrSlug(slug: string): Promise<ServerEntry | null> {
+  const isNumeric = /^\d+$/.test(slug);
   
-  try {
-    const { data, error } = await supabase
-      .from("servers")
-      .select("*")
-      .eq("id", id)
-      .eq("status", "approved")
-      .single();
-    if (error || !data) {
-      console.error("Error fetching server:", error);
+  if (isNumeric) {
+    // Get server by ID
+    try {
+      const { data, error } = await supabase
+        .from("servers")
+        .select("*")
+        .eq("id", slug)
+        .eq("status", "approved")
+        .single();
+        
+      if (error || !data) {
+        console.error("Error fetching server by ID:", error);
+        return null;
+      }
+      
+      return normalizeArrayData(data);
+    } catch (error) {
+      console.error("Error fetching server by ID:", error);
       return null;
     }
-
-    return normalizeArrayData(data);
-  } catch (err) {
-    console.error("Exception fetching server:", err);
+  } else {
+    // Get server by slug
+    const server = await getServerBySlug(slug);
+    if (server) {
+      return normalizeArrayData(server);
+    }
     return null;
   }
 }
 
-interface Props {
-  params: Promise<{ id: string }>;
-}
-
 // Generate dynamic metadata for the page
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  // Safely access params
-  const {id} = await params
-  if (!id) {
+  const { slug } = await params;
+  
+  if (!slug) {
     return {
       title: "Server Not Found | MCP Server Directory",
       description: "The requested MCP server could not be found.",
     };
   }
 
-  const server = await getServer(id);
+  const server = await getServerByIdOrSlug(slug);
   
   if (!server) {
     return {
@@ -73,40 +85,92 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
   
-  // We know tags and features are arrays because of normalizeArrayData
+  // Create proper slug for canonical URL
+  const serverSlug = generateSlug(server.name);
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mcp-server-directory.com';
+  const canonicalUrl = `${baseUrl}/servers/${serverSlug}`;
+  
+  // Truncate description safely
+  const metaDescription = server.description?.length > 160 
+    ? `${server.description.substring(0, 157)}...` 
+    : server.description || '';
   
   return {
     title: `${server.name} | MCP Server Directory`,
-    description: `${server.description.substring(0, 160)}${server.description.length > 160 ? '...' : ''}`,
+    description: metaDescription,
     keywords: ["MCP server", "Model Context Protocol", ...server.tags, ...(server.features || [])],
     openGraph: {
       title: `${server.name} - Model Context Protocol Server`,
-      description: server.description,
+      description: metaDescription,
       type: "website",
-      images: server.logo_url ? [{ url: server.logo_url }] : undefined,
+      url: canonicalUrl,
+      siteName: "MCP Server Directory",
+      images: server.logo_url ? [{ 
+        url: server.logo_url,
+        alt: `${server.name} logo`
+      }] : undefined,
     },
     twitter: {
       card: "summary",
       title: `${server.name} | MCP Server`,
-      description: `${server.description.substring(0, 160)}${server.description.length > 160 ? '...' : ''}`,
+      description: metaDescription,
       images: server.logo_url ? [server.logo_url] : undefined,
     },
+    alternates: {
+      canonical: canonicalUrl
+    }
   };
 }
 
-
+// Generate static paths for all server slugs and IDs
+export async function generateStaticParams() {
+  try {
+    const { data } = await supabase
+      .from("servers")
+      .select("id, name")
+      .eq("status", "approved");
+    
+    if (!data) return [];
+    
+    // Generate paths for all server slugs and IDs
+    return data.flatMap(server => [
+      { slug: String(server.id) },
+      { slug: generateSlug(server.name) }
+    ]);
+  } catch (err) {
+    console.error("Error generating static paths:", err);
+    return [];
+  }
+}
 
 export default async function ServerDetailPage({ params }: Props) {
-  // Safely access params
-  const {id} = await params
-  if (!id) {
+  const { slug } = await params;
+  
+  if (!slug) {
     notFound();
   }
 
-  const server = await getServer(id);
-
+  // Get the server
+  const server = await getServerByIdOrSlug(slug);
+  
   if (!server) {
     notFound();
+  }
+  
+  // Create slug for canonical URL
+  const serverSlug = generateSlug(server.name);
+  
+  // If this is a numeric ID, redirect to the slug version for better SEO
+  if (/^\d+$/.test(slug)) {
+    redirect(`/servers/${serverSlug}`);
+  }
+  
+  // Only redirect if there's a significant difference between slugs
+  // This prevents unnecessary redirects for minor differences or case variations
+  if (slug.toLowerCase() !== serverSlug.toLowerCase() && 
+      !serverSlug.toLowerCase().includes(slug.toLowerCase()) &&
+      !slug.toLowerCase().includes(serverSlug.toLowerCase())) {
+    redirect(`/servers/${serverSlug}`);
   }
 
   // Create structured data for the server
@@ -222,34 +286,32 @@ export default async function ServerDetailPage({ params }: Props) {
             </div>
           </div>
           
-          <div>
-            <div className="rounded-lg border p-4 md:p-6 md:sticky md:top-24">
-              <h2 className="mb-3 md:mb-4 text-lg md:text-xl font-semibold">Links & Contact</h2>
-              <div className="space-y-3 md:space-y-4">
-                {server.github_url && (
-                  <a
-                    href={server.github_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    <Github className="h-4 w-4 flex-shrink-0" />
-                    <span className="break-all">{server.github_url.replace("https://github.com/", "")}</span>
-                  </a>
-                )}
-                
-                {server.contact_email && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Mail className="h-4 w-4 flex-shrink-0" />
-                    <span className="break-all">{server.contact_email === "aki.tyagi1991@gmail.com" ? "Contact me on GitHub" : server.contact_email}</span>
-                  </div>
-                )}
-                
-                <div className="pt-3 md:pt-4">
-                  <span className="text-xs text-muted-foreground">
-                    Added on {new Date(server.created_at).toLocaleDateString()}
-                  </span>
+          <div className="rounded-lg border p-4 md:p-6 md:sticky md:top-24">
+            <h2 className="mb-3 md:mb-4 text-lg md:text-xl font-semibold">Links & Contact</h2>
+            <div className="space-y-3 md:space-y-4">
+              {server.github_url && (
+                <a
+                  href={server.github_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                >
+                  <Github className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-all">{server.github_url.replace("https://github.com/", "")}</span>
+                </a>
+              )}
+              
+              {server.contact_email && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4 flex-shrink-0" />
+                  <span className="break-all">{server.contact_email === "aki.tyagi1991@gmail.com" ? "Contact me on GitHub" : server.contact_email}</span>
                 </div>
+              )}
+              
+              <div className="pt-3 md:pt-4">
+                <span className="text-xs text-muted-foreground">
+                  Added on {new Date(server.created_at).toLocaleDateString()}
+                </span>
               </div>
             </div>
           </div>
