@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Define logo path once
-const logoPath = getImagePath("/mcp-server-directory.png");
+// Define logo path once with versioning
+const logoPath = getImagePath("/mcp-server-directory.png", true);
 
 export const metadata: Metadata = {
   title: "MCP Server Directory | Find & Share Model Context Protocol Servers",
@@ -83,19 +83,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Create a cache-busting parameter using the current timestamp
-  const cacheBuster = `?v=${Date.now()}`;
-
   return (
     <html lang="en">
       <head>
-        {/* Force browser to use the latest favicon by adding cache buster */}
-        <link rel="icon" href={`${logoPath}${cacheBuster}`} sizes="any" />
-        <link rel="shortcut icon" href={`${logoPath}${cacheBuster}`} />
-        <link rel="apple-touch-icon" href={`${logoPath}${cacheBuster}`} />
-        {/* Add cache busting meta tag */}
-        <meta http-equiv="Pragma" content="no-cache" />
-        <meta http-equiv="Expires" content="0" />
+        {/* Force browser to use the latest favicon */}
+        <link rel="icon" href={logoPath} sizes="any" />
+        <link rel="shortcut icon" href={logoPath} />
+        <link rel="apple-touch-icon" href={logoPath} />
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
         <meta name="google-site-verification" content="xgZR0c3YvTHe9t68xMEPrR4EjCkedhRvobbJmEYMevw" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>

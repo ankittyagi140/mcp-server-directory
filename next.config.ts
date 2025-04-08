@@ -49,10 +49,19 @@ const nextConfig: NextConfig = {
         hostname: 'xmfcfqpkkvtekljidvfh.supabase.in', // Alternative Supabase domain
       },
     ],
+    // Handle local image unoptimization for logo handling
+    unoptimized: true,
   },
   // Add base path and asset prefix for proper static asset loading
   basePath: '',
   assetPrefix: process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_SITE_URL : '',
+  // Adjust caching for static assets
+  outputFileTracing: true,
+  experimental: {
+    // Now we have the critters package installed
+    optimizeCss: true,
+    optimizeServerReact: true,
+  },
 };
 
 export default nextConfig;

@@ -15,6 +15,9 @@ export default function Navbar() {
   const menuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
+  // Use enhanced getImagePath with version flag
+  const logoSrc = getImagePath("/mcp-server-directory.png", true);
+
   // Close menus when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -60,7 +63,14 @@ export default function Navbar() {
       <div className="container flex h-16 items-center">
         <div className="flex gap-2 md:gap-10">
           <Link className="flex items-center space-x-2" href="/">
-            <Image src={getImagePath("/mcp-server-directory.png")} alt="MCP Server Directory" width={32} height={32} />
+            <Image 
+              src={logoSrc} 
+              alt="MCP Server Directory" 
+              width={32} 
+              height={32} 
+              priority 
+              unoptimized
+            />
             <span className="inline-block font-bold text-sm md:text-base truncate max-w-[120px] md:max-w-full">MCP Server Directory</span>
           </Link>
         </div>
