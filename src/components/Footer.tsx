@@ -6,6 +6,9 @@ import { getImagePath } from "@/lib/utils";
 import { Github, Twitter, Mail } from "lucide-react";
 
 export default function Footer() {
+  // Use enhanced getImagePath with version flag
+  const logoSrc = getImagePath("/mcp-server-directory.png", true);
+  
   return (
     <footer className="border-t py-8 bg-background/95">
       <div className="container">
@@ -13,10 +16,11 @@ export default function Footer() {
           <div className="flex items-start gap-4 max-w-xl">
             <div className="p-2 rounded-lg">
               <Image 
-                src={getImagePath("/mcp-server-directory.png")} 
+                src={logoSrc} 
                 alt="MCP Server Directory" 
                 width={48} 
                 height={48} 
+                priority
                 unoptimized
               />
             </div>
