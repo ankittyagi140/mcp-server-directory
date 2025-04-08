@@ -241,7 +241,7 @@ export default async function ServerDetailPage({ params }: Props) {
                 {server.contact_email && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Mail className="h-4 w-4 flex-shrink-0" />
-                    <span className="break-all">{server.contact_email}</span>
+                    <span className="break-all">{server.contact_email === "aki.tyagi1991@gmail.com" ? "Contact me on GitHub" : server.contact_email}</span>
                   </div>
                 )}
                 
