@@ -6,6 +6,7 @@ import { useAuth, signOut } from "@/lib/auth";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import Image from "next/image";
+import { getImagePath } from "@/lib/utils";
 
 export default function Navbar() {
   const { user, isLoading } = useAuth();
@@ -59,7 +60,7 @@ export default function Navbar() {
       <div className="container flex h-16 items-center">
         <div className="flex gap-2 md:gap-10">
           <Link className="flex items-center space-x-2" href="/">
-            <Image src="/mcp-server-directory.png" alt="MCP Server Directory" width={32} height={32} />
+            <Image src={getImagePath("/mcp-server-directory.png")} alt="MCP Server Directory" width={32} height={32} />
             <span className="inline-block font-bold text-sm md:text-base truncate max-w-[120px] md:max-w-full">MCP Server Directory</span>
           </Link>
         </div>

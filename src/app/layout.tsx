@@ -83,10 +83,19 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Create a cache-busting parameter using the current timestamp
+  const cacheBuster = `?v=${Date.now()}`;
+
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href={logoPath} sizes="any" />
+        {/* Force browser to use the latest favicon by adding cache buster */}
+        <link rel="icon" href={`${logoPath}${cacheBuster}`} sizes="any" />
+        <link rel="shortcut icon" href={`${logoPath}${cacheBuster}`} />
+        <link rel="apple-touch-icon" href={`${logoPath}${cacheBuster}`} />
+        {/* Add cache busting meta tag */}
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
         <meta name="google-site-verification" content="xgZR0c3YvTHe9t68xMEPrR4EjCkedhRvobbJmEYMevw" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
