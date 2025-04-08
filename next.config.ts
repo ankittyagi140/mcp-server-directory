@@ -56,7 +56,6 @@ const nextConfig: NextConfig = {
   basePath: '',
   assetPrefix: process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_SITE_URL : '',
   // Adjust caching for static assets
-  outputFileTracing: true,
   experimental: {
     // Now we have the critters package installed
     optimizeCss: true,
