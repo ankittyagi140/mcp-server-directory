@@ -35,24 +35,74 @@ export async function GET(request: NextRequest) {
   // Get the correct site origin
   const siteOrigin = getSiteOrigin(requestUrl);
   
+  // Log important data for debugging
+  console.log('Auth callback debug:', {
+    hasCode: !!code,
+    redirectTo,
+    siteOrigin,
+    requestOrigin: requestUrl.origin,
+    requestUrl: requestUrl.toString(),
+    env: process.env.NODE_ENV
+  });
+  
   if (code) {
     // Create a supabase client
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // Try to exchange the code for a session
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    
-    if (data.session) {
-      // If auth was successful, redirect to the specified path with success parameter
-      return NextResponse.redirect(new URL(`${redirectTo}?auth=success`, siteOrigin));
-    }
-    
-    if (error) {
-      console.error('Auth error:', error);
-      // On error, redirect to login with error message
-      return NextResponse.redirect(new URL('/login?error=auth_failed', siteOrigin));
+    try {
+      // Try to exchange the code for a session
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+      
+      if (error) {
+        console.error('Auth code exchange error:', error);
+        return NextResponse.redirect(new URL('/login?error=auth_failed', siteOrigin));
+      }
+      
+      if (!data.session) {
+        console.error('No session after code exchange');
+        return NextResponse.redirect(new URL('/login?error=no_session', siteOrigin));
+      }
+      
+      console.log('Auth successful for:', data.session.user.email);
+      
+      // Create the response with the redirect
+      const response = NextResponse.redirect(new URL(`${redirectTo}?auth=success`, siteOrigin));
+      
+      // Ensure cookies are properly set in the response
+      if (data.session) {
+        // Set access token cookie
+        response.cookies.set({
+          name: 'sb-access-token',
+          value: data.session.access_token,
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+          path: '/',
+          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
+          domain: process.env.NODE_ENV === 'production' 
+            ? '.mcp-server-directory.com' 
+            : undefined
+        });
+        
+        // Set refresh token cookie
+        response.cookies.set({
+          name: 'sb-refresh-token',
+          value: data.session.refresh_token,
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+          path: '/',
+          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
+          domain: process.env.NODE_ENV === 'production' 
+            ? '.mcp-server-directory.com' 
+            : undefined
+        });
+      }
+      
+      return response;
+    } catch (e) {
+      console.error('Exception during auth code exchange:', e);
+      return NextResponse.redirect(new URL('/login?error=exception', siteOrigin));
     }
   }
   

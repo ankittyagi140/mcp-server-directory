@@ -11,11 +11,61 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Missing Supabase credentials. Please check your .env.local file.');
 }
 
+// Get cookie domain based on environment
+const getCookieDomain = () => {
+  if (typeof window === 'undefined') {
+    // Server-side
+    return process.env.NODE_ENV === 'production' 
+      ? '.mcp-server-directory.com' 
+      : 'localhost';
+  }
+  // Client-side
+  const hostname = window.location.hostname;
+  return hostname === 'localhost' ? 'localhost' : hostname;
+};
+
 // Create the Supabase client with explicit options
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
+    // Use storage instead of cookieOptions directly
+    storage: {
+      getItem: (key) => {
+        if (typeof window === 'undefined') {
+          return null;
+        }
+        return window.localStorage.getItem(key);
+      },
+      setItem: (key, value) => {
+        if (typeof window === 'undefined') {
+          return;
+        }
+        window.localStorage.setItem(key, value);
+        
+        // Also set cookie with proper domain for cross-domain usage
+        try {
+          const domain = getCookieDomain();
+          document.cookie = `${key}=${value}; max-age=${60 * 60 * 24 * 7}; domain=${domain}; path=/; ${process.env.NODE_ENV === 'production' ? 'secure; ' : ''}SameSite=Lax`;
+        } catch (e) {
+          console.error('Error setting auth cookie:', e);
+        }
+      },
+      removeItem: (key) => {
+        if (typeof window === 'undefined') {
+          return;
+        }
+        window.localStorage.removeItem(key);
+        
+        // Also remove cookie
+        try {
+          const domain = getCookieDomain();
+          document.cookie = `${key}=; max-age=0; domain=${domain}; path=/; ${process.env.NODE_ENV === 'production' ? 'secure; ' : ''}SameSite=Lax`;
+        } catch (e) {
+          console.error('Error removing auth cookie:', e);
+        }
+      }
+    }
   },
   db: {
     schema: 'public',

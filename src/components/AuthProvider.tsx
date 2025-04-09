@@ -18,10 +18,18 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     // Get initial session
     const getInitialSession = async () => {
       try {
+        console.log("Getting initial auth session...");
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
+          console.error('Error getting initial session:', error);
           throw error;
+        }
+        
+        if (data.session) {
+          console.log("Found active session for user:", data.session.user.email);
+        } else {
+          console.log("No active session found");
         }
         
         setSession({
@@ -43,8 +51,9 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
-        console.log(`Auth event: ${event}`);
+        console.log(`Auth event: ${event}`, newSession?.user?.email || 'No user');
         
+        // Set new session data
         setSession({
           user: newSession?.user ? {
             id: newSession.user.id,
@@ -53,6 +62,13 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           } : null,
           isLoading: false,
         });
+        
+        // If we have a logout event, make sure to clear any leftover cookies
+        if (event === 'SIGNED_OUT' && typeof window !== 'undefined') {
+          // Clear any lingering supabase cookies
+          document.cookie = 'sb-access-token=; max-age=0; path=/;';
+          document.cookie = 'sb-refresh-token=; max-age=0; path=/;';
+        }
       }
     );
 
