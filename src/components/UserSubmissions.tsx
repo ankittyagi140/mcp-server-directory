@@ -8,11 +8,19 @@ import { ClockIcon, CheckCircle, XCircle, ArrowRight, Loader2 } from "lucide-rea
 import Link from "next/link";
 import Image from "next/image";
 
+type TabType = 'pending' | 'approved' | 'rejected';
+
 export default function UserSubmissions() {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<TabType>('pending');
   const [submissions, setSubmissions] = useState<ServerEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState({
+    pending: 0,
+    approved: 0,
+    rejected: 0
+  });
 
   useEffect(() => {
     async function fetchSubmissions() {
@@ -22,8 +30,18 @@ export default function UserSubmissions() {
       setError(null);
       
       try {
-        const userSubmissions = await getUserSubmissions(user.id);
-        setSubmissions(userSubmissions);
+        const allSubmissions = await getUserSubmissions(user.id);
+        
+        // Calculate counts for each status
+        const counts = {
+          pending: allSubmissions.filter(sub => sub.status === 'pending').length,
+          approved: allSubmissions.filter(sub => sub.status === 'approved').length,
+          rejected: allSubmissions.filter(sub => sub.status === 'rejected').length
+        };
+        setStats(counts);
+        
+        // Filter submissions based on active tab
+        setSubmissions(allSubmissions.filter(submission => submission.status === activeTab));
       } catch (err) {
         console.error("Error fetching submissions:", err);
         setError("Failed to load your submissions. Please try again.");
@@ -33,7 +51,7 @@ export default function UserSubmissions() {
     }
     
     fetchSubmissions();
-  }, [user]);
+  }, [user, activeTab]);
 
   if (isLoading) {
     return (
@@ -52,15 +70,26 @@ export default function UserSubmissions() {
     );
   }
 
-  if (submissions.length === 0) {
+  // Tab definitions with explicit colors and styling
+  const tabs = [
+    { id: 'pending', label: 'Pending', icon: <ClockIcon className="h-4 w-4 mr-1" />, count: stats.pending, bgColor: 'bg-amber-100', textColor: 'text-amber-800', borderColor: 'border-amber-500' },
+    { id: 'approved', label: 'Approved', icon: <CheckCircle className="h-4 w-4 mr-1" />, count: stats.approved, bgColor: 'bg-green-100', textColor: 'text-green-800', borderColor: 'border-green-500' },
+    { id: 'rejected', label: 'Rejected', icon: <XCircle className="h-4 w-4 mr-1" />, count: stats.rejected, bgColor: 'bg-red-100', textColor: 'text-red-800', borderColor: 'border-red-500' }
+  ];
+
+  const getEmptyStateForTab = () => {
     return (
       <div className="text-center py-12 px-4">
         <div className="mb-4 mx-auto w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center">
-          <ClockIcon className="h-8 w-8 text-slate-400" />
+          {activeTab === 'pending' && <ClockIcon className="h-8 w-8 text-amber-500" />}
+          {activeTab === 'approved' && <CheckCircle className="h-8 w-8 text-green-500" />}
+          {activeTab === 'rejected' && <XCircle className="h-8 w-8 text-red-500" />}
         </div>
-        <h3 className="text-xl font-semibold mb-2">No submissions yet</h3>
+        <h3 className="text-xl font-semibold mb-2">No {activeTab} submissions</h3>
         <p className="text-slate-500 mb-6 max-w-md mx-auto">
-          You haven&apos;t submitted any MCP servers yet. Submit your first server to see it here.
+          {activeTab === 'pending' && "You don't have any pending submissions awaiting review."}
+          {activeTab === 'approved' && "You don't have any approved submissions yet."}
+          {activeTab === 'rejected' && "You don't have any rejected submissions."}
         </p>
         <Link 
           href="/submit" 
@@ -70,75 +99,104 @@ export default function UserSubmissions() {
         </Link>
       </div>
     );
-  }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Your Submissions</h2>
-        <Link 
-          href="/submit" 
-          className="text-sm font-medium text-green-600 hover:text-green-700 flex items-center"
-        >
-          New Submission <ArrowRight className="ml-1 h-4 w-4" />
-        </Link>
-      </div>
-      
-      <div className="space-y-4">
-        {submissions.map((submission) => (
-          <div key={submission.id} className="rounded-lg border shadow-sm p-4 bg-white">
-            <div className="flex items-start gap-4">
-              {submission.logo_url ? (
-                <Image 
-                  src={submission.logo_url} 
-                  alt={`${submission.name} logo`} 
-                  width={48} 
-                  height={48} 
-                  className="rounded-md object-contain h-12 w-12"
-                  unoptimized={true}
-                />
-              ) : (
-                <div className="rounded-md bg-slate-100 h-12 w-12 flex items-center justify-center">
-                  <span className="text-slate-400 text-lg font-semibold">
-                    {submission.name.charAt(0)}
-                  </span>
-                </div>
-              )}
-              
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-semibold text-lg">{submission.name}</h3>
-                  <StatusBadge status={submission.status} />
-                </div>
-                
-                <p className="text-sm text-slate-500 line-clamp-2 mt-1">
-                  {submission.description}
-                </p>
-                
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {submission.tags.slice(0, 3).map((tag, index) => (
-                    <span 
-                      key={index} 
-                      className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {submission.tags.length > 3 && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                      +{submission.tags.length - 3} more
-                    </span>
-                  )}
-                </div>
-                
-                <div className="mt-3 pt-3 border-t text-sm text-slate-500">
-                  <p>Submitted on {new Date(submission.created_at).toLocaleDateString()}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Tabs with explicit styling */}
+      <div className="flex flex-wrap gap-2 sm:gap-0 border-b border-gray-200">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as TabType)}
+            className={`
+              relative flex items-center py-3 px-4 text-sm font-medium rounded-t-lg transition-colors cursor-pointer
+              ${activeTab === tab.id ? 
+                `${tab.textColor} border-b-2 ${tab.borderColor}` : 
+                'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }
+            `}
+          >
+            <span className="flex items-center">
+              {tab.icon}
+              {tab.label}
+            </span>
+            <span className={`ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium ${activeTab === tab.id ? tab.bgColor : 'bg-gray-100'}`}>
+              {tab.count}
+            </span>
+          </button>
         ))}
       </div>
+      
+      {submissions.length === 0 ? getEmptyStateForTab() : (
+        <>
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Your {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Submissions</h2>
+            <Link 
+              href="/submit" 
+              className="text-sm font-medium text-green-600 hover:text-green-700 flex items-center"
+            >
+              New Submission <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+          
+          <div className="space-y-4">
+            {submissions.map((submission) => (
+              <div key={submission.id} className="rounded-lg border shadow-sm p-4 bg-white">
+                <div className="flex items-start gap-4">
+                  {submission.logo_url ? (
+                    <Image 
+                      src={submission.logo_url} 
+                      alt={`${submission.name} logo`} 
+                      width={48} 
+                      height={48} 
+                      className="rounded-md object-contain h-12 w-12"
+                      unoptimized={true}
+                    />
+                  ) : (
+                    <div className="rounded-md bg-slate-100 h-12 w-12 flex items-center justify-center">
+                      <span className="text-slate-400 text-lg font-semibold">
+                        {submission.name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-semibold text-lg">{submission.name}</h3>
+                      <StatusBadge status={submission.status} />
+                    </div>
+                    
+                    <p className="text-sm text-slate-500 line-clamp-2 mt-1">
+                      {submission.description}
+                    </p>
+                    
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {submission.tags.slice(0, 3).map((tag, index) => (
+                        <span 
+                          key={index} 
+                          className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {submission.tags.length > 3 && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                          +{submission.tags.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t text-sm text-slate-500">
+                      <p>Submitted on {new Date(submission.created_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

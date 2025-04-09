@@ -7,6 +7,7 @@ import "./globals.css";
 import AuthProvider from '@/components/AuthProvider';
 import { Toaster } from "react-hot-toast";
 import AuthSuccess from '@/components/AuthSuccess';
+import RoleDisplay from '@/components/RoleDisplay';
 import { getImagePath } from "@/lib/utils";
 
 const geistSans = Geist({
@@ -107,6 +108,9 @@ export default function RootLayout({
           <Toaster position="top-right" />
           <Suspense fallback={null}>
             <AuthSuccess />
+          </Suspense>
+          <Suspense fallback={null}>
+            <RoleDisplay />
           </Suspense>
         </AuthProvider>
       </body>

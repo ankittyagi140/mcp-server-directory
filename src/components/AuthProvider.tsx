@@ -28,7 +28,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           user: data.session?.user ? {
             id: data.session.user.id,
             email: data.session.user.email || undefined,
-            role: data.session.user.role || undefined,
+            role: data.session.user.user_metadata?.role || undefined,
           } : null,
           isLoading: false,
         });
@@ -49,7 +49,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           user: newSession?.user ? {
             id: newSession.user.id,
             email: newSession.user.email || undefined,
-            role: newSession.user.role || undefined,
+            role: newSession.user.user_metadata?.role || undefined,
           } : null,
           isLoading: false,
         });

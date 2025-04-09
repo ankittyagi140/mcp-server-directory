@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { PlusCircle, Menu, X } from "lucide-react";
+import { PlusCircle, Menu, X, LayoutDashboard, FileText } from "lucide-react";
 import { useAuth, signOut } from "@/lib/auth";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
@@ -17,6 +17,9 @@ export default function Navbar() {
 
   // Use enhanced getImagePath with version flag
   const logoSrc = getImagePath("/mcp-server-directory.png", true);
+
+  // Check if user is admin
+  const isAdmin = user?.role === 'admin';
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -96,7 +99,7 @@ export default function Navbar() {
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center space-x-2 rounded-full bg-green-100 px-3 py-1.5 text-sm font-medium text-green-800 transition-colors hover:bg-green-200"
+                    className="flex cursor-pointer items-center space-x-2 rounded-full bg-green-100 px-3 py-1.5 text-sm font-medium text-green-800 transition-colors hover:bg-green-200"
                   >
                     <span className="flex items-center">
                       <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
@@ -122,17 +125,41 @@ export default function Navbar() {
                   {isUserMenuOpen && (
                     <div className="absolute top-full right-0 mt-2 w-48 rounded-md border bg-background shadow-lg z-50">
                       <div className="py-1">
-                        <Link
-                          href="/submissions"
-                          className="block w-full px-4 py-2 text-left text-sm hover:bg-muted"
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          My Submissions
-                        </Link>
+                        {isAdmin ? (
+                          <Link
+                            href="/admin"
+                            className="flex items-center w-full px-4 py-2 text-left text-sm hover:bg-muted"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <LayoutDashboard className="h-4 w-4 mr-2" />
+                            Admin Dashboard
+                          </Link>
+                        ) : (
+                          <Link
+                            href="/submissions"
+                            className="flex items-center w-full px-4 py-2 text-left text-sm hover:bg-muted"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            My Submissions
+                          </Link>
+                        )}
+                        {/* Always show My Submissions for admins as a secondary option */}
+                        {isAdmin && (
+                          <Link
+                            href="/submissions"
+                            className="flex items-center w-full px-4 py-2 text-left text-sm hover:bg-muted"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            My Submissions
+                          </Link>
+                        )}
                         <button
                           onClick={handleLogout}
-                          className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-muted"
+                          className="flex items-center w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-muted cursor-pointer"
                         >
+                          <X className="h-4 w-4 mr-2" />
                           Sign Out
                         </button>
                       </div>
@@ -201,13 +228,39 @@ export default function Navbar() {
                     <span className="h-3 w-3 rounded-full bg-green-500 mr-3"></span>
                     <span className="font-medium text-green-800">{user.email?.split("@")[0]}</span>
                   </div>
-                  <Link
-                    href="/submissions"
-                    className="text-base font-medium flex items-center"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    My Submissions
-                  </Link>
+                  
+                  {isAdmin ? (
+                    <Link
+                      href="/admin"
+                      className="text-base font-medium flex items-center"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="mr-2 h-5 w-5" />
+                      Admin Dashboard
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/submissions"
+                      className="text-base font-medium flex items-center"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <FileText className="mr-2 h-5 w-5" />
+                      My Submissions
+                    </Link>
+                  )}
+                  
+                  {/* Always show My Submissions for admins as a secondary option */}
+                  {isAdmin && (
+                    <Link
+                      href="/submissions"
+                      className="text-base font-medium flex items-center"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <FileText className="mr-2 h-5 w-5" />
+                      My Submissions
+                    </Link>
+                  )}
+                  
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center justify-center rounded-full bg-red-100 px-4 py-3 text-base font-medium text-red-700 transition-colors hover:bg-red-200"

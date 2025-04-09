@@ -49,7 +49,7 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="mb-8">
+      <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
         <p className="text-muted-foreground">
           Review and manage server submissions.

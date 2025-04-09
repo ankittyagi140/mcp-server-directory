@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Check, X, RefreshCw, ExternalLink, Info, Edit2, Save } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Check, X, RefreshCw, ExternalLink, Info, Edit2, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import type { ServerEntry } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import Image from "next/image";
 
 type TabType = 'pending' | 'approved' | 'rejected';
 
@@ -19,6 +21,29 @@ export default function AdminDashboard() {
   const [selectedServer, setSelectedServer] = useState<ServerEntry | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedServer, setEditedServer] = useState<Partial<ServerEntry>>({});
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [stats, setStats] = useState({
+    pending: 0,
+    approved: 0,
+    rejected: 0
+  });
+
+  const fetchAllStats = useCallback(async () => {
+    try {
+      // Get counts for each status
+      const pendingCount = await getStatusCount('pending');
+      const approvedCount = await getStatusCount('approved');
+      const rejectedCount = await getStatusCount('rejected');
+      
+      setStats({
+        pending: pendingCount,
+        approved: approvedCount,
+        rejected: rejectedCount
+      });
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    }
+  }, []);
 
   useEffect(() => {
     // Check if user is admin
@@ -27,12 +52,29 @@ export default function AdminDashboard() {
       return;
     }
     
+    fetchAllStats();
     fetchServers(activeTab);
-  }, [activeTab, user, router]);
+  }, [activeTab, user, router, fetchAllStats]);
+
+  async function getStatusCount(status: TabType) {
+    try {
+      const { count, error } = await supabase
+        .from("servers")
+        .select("*", { count: 'exact', head: true })
+        .eq("status", status);
+        
+      if (error) throw error;
+      return count || 0;
+    } catch (err) {
+      console.error(`Error getting ${status} count:`, err);
+      return 0;
+    }
+  }
 
   async function fetchServers(status: TabType) {
     setIsLoading(true);
     setError(null);
+    setSelectedServer(null);
 
     try {
       const { data, error } = await supabase
@@ -67,11 +109,42 @@ export default function AdminDashboard() {
         setSelectedServer(null);
       }
       
-      // Refresh the target tab's data
+      toast.success(`Server ${status === 'approved' ? 'approved' : 'rejected'} successfully`);
+      
+      // Refresh stats and current tab data
+      fetchAllStats();
       fetchServers(activeTab);
     } catch (err) {
       console.error(`Error ${status} server:`, err);
       setError(`Failed to ${status} server. Please try again.`);
+      toast.error(`Error ${status === 'approved' ? 'approving' : 'rejecting'} server`);
+    }
+  }
+
+  async function deleteServer(id: string) {
+    setIsDeleting(true);
+    
+    try {
+      const { error } = await supabase
+        .from("servers")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Update local state
+      setServers(servers.filter(server => String(server.id) !== id));
+      setSelectedServer(null);
+      
+      toast.success("Server deleted successfully");
+      
+      // Refresh stats
+      fetchAllStats();
+    } catch (err) {
+      console.error("Error deleting server:", err);
+      toast.error("Failed to delete server");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -95,11 +168,21 @@ export default function AdminDashboard() {
       ));
       setIsEditing(false);
       setEditedServer({});
+      
+      toast.success("Server updated successfully");
     } catch (err) {
       console.error("Error updating server:", err);
       setError("Failed to update server. Please try again.");
+      toast.error("Error updating server");
     }
   }
+
+  // Function to handle delete confirmation
+  const handleDeleteConfirm = (id: string) => {
+    if (window.confirm("Are you sure you want to delete this server? This action cannot be undone.")) {
+      deleteServer(id);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -111,7 +194,7 @@ export default function AdminDashboard() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`
-                whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium
+                relative whitespace-nowrap border-b-2 py-4 px-4 text-sm font-medium
                 ${activeTab === tab
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground'
@@ -119,6 +202,9 @@ export default function AdminDashboard() {
               `}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100">
+                {stats[tab]}
+              </span>
             </button>
           ))}
         </nav>
@@ -157,7 +243,7 @@ export default function AdminDashboard() {
               <p>No {activeTab} servers.</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
               {servers.map((server) => (
                 <button
                   key={server.id}
@@ -199,29 +285,33 @@ export default function AdminDashboard() {
                     selectedServer.name
                   )}
                 </h2>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   {activeTab === 'pending' && (
                     <>
                       <button
                         onClick={() => updateServerStatus(String(selectedServer.id), "approved")}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-md bg-green-600 px-3 text-sm font-medium text-white hover:bg-green-700"
+                        disabled={isDeleting}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-md bg-green-600 px-3 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
                       >
                         <Check className="h-4 w-4" />
                         Approve
                       </button>
                       <button
                         onClick={() => updateServerStatus(String(selectedServer.id), "rejected")}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-md bg-red-600 px-3 text-sm font-medium text-white hover:bg-red-700"
+                        disabled={isDeleting}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-md bg-red-600 px-3 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
                       >
                         <X className="h-4 w-4" />
                         Reject
                       </button>
                     </>
                   )}
+                  
                   {!isEditing ? (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-700"
+                      disabled={isDeleting}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                     >
                       <Edit2 className="h-4 w-4" />
                       Edit
@@ -229,14 +319,47 @@ export default function AdminDashboard() {
                   ) : (
                     <button
                       onClick={saveServerChanges}
-                      className="inline-flex h-9 items-center gap-1.5 rounded-md bg-green-600 px-3 text-sm font-medium text-white hover:bg-green-700"
+                      disabled={isDeleting}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-md bg-green-600 px-3 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
                     >
                       <Save className="h-4 w-4" />
                       Save
                     </button>
                   )}
+                  
+                  {/* Delete button - only show for approved/rejected servers */}
+                  {(activeTab === 'approved' || activeTab === 'rejected') && (
+                    <button
+                      onClick={() => handleDeleteConfirm(String(selectedServer.id))}
+                      disabled={isDeleting}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-md bg-red-600 px-3 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {isDeleting ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                      Delete
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {/* Logo preview - if available */}
+              {selectedServer.logo_url && (
+                <div className="mb-6 flex justify-center">
+                  <div className="relative overflow-hidden rounded-lg border p-2 w-32 h-32">
+                    <Image 
+                      src={selectedServer.logo_url} 
+                      alt={`${selectedServer.name} logo`}
+                      width={128}
+                      height={128}
+                      className="object-contain h-full w-full"
+                      unoptimized={true}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
@@ -253,7 +376,7 @@ export default function AdminDashboard() {
                       />
                     ) : (
                       <>
-                        <code className="text-sm">{selectedServer.endpoint_url}</code>
+                        <code className="text-sm break-all">{selectedServer.endpoint_url}</code>
                         <a
                           href={selectedServer.endpoint_url}
                           target="_blank"
@@ -274,22 +397,31 @@ export default function AdminDashboard() {
                   {isEditing ? (
                     <input
                       type="text"
-                      value={editedServer.tags ? editedServer.tags.join(", ") : selectedServer.tags.join(", ")}
+                      value={
+                        Array.isArray(editedServer.tags) 
+                          ? editedServer.tags.join(", ")
+                          : editedServer.tags || (Array.isArray(selectedServer.tags)
+                              ? selectedServer.tags.join(", ")
+                              : (selectedServer.tags || ""))
+                      }
                       onChange={(e) => setEditedServer({ 
                         ...editedServer, 
-                        tags: e.target.value.split(",").map(tag => tag.trim()).filter(Boolean)
+                        tags: e.target.value.split(",").map(tag => tag.trim()).filter(tag => tag !== "")
                       })}
                       className="w-full rounded-md border p-2"
                       placeholder="tag1, tag2, tag3"
                     />
                   ) : (
                     <div className="flex flex-wrap gap-1">
-                      {selectedServer.tags?.map((tag) => (
+                      {(Array.isArray(selectedServer.tags) 
+                        ? selectedServer.tags 
+                        : (selectedServer.tags ? String(selectedServer.tags).split(',').map(tag => tag.trim()) : [])
+                      ).map((tag) => (
                         <span
                           key={tag}
-                          className="inline-flex items-center text-xs font-medium text-blue-600 px-1"
+                          className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                         >
-                          [{tag}]
+                          {tag}
                         </span>
                       ))}
                     </div>
@@ -322,7 +454,15 @@ export default function AdminDashboard() {
                   </h3>
                   {isEditing ? (
                     <textarea
-                      value={editedServer.features ? editedServer.features.join("\n") : selectedServer.features?.join("\n")}
+                      value={
+                        editedServer.features && Array.isArray(editedServer.features) 
+                          ? editedServer.features.join("\n") 
+                          : Array.isArray(selectedServer.features) 
+                            ? selectedServer.features.join("\n") 
+                            : selectedServer.features 
+                              ? String(selectedServer.features).split(',').join("\n") 
+                              : ''
+                      }
                       onChange={(e) => setEditedServer({ 
                         ...editedServer, 
                         features: e.target.value.split("\n").map(feature => feature.trim()).filter(Boolean)
@@ -333,7 +473,10 @@ export default function AdminDashboard() {
                     />
                   ) : (
                     <ul className="list-inside list-disc rounded-md bg-muted p-3 text-sm">
-                      {selectedServer.features?.map((feature, index) => (
+                      {(Array.isArray(selectedServer.features) 
+                        ? selectedServer.features 
+                        : (selectedServer.features ? String(selectedServer.features).split(',').map(feature => feature.trim()) : [])
+                      ).map((feature, index) => (
                         <li key={index}>{feature}</li>
                       ))}
                     </ul>
@@ -363,7 +506,7 @@ export default function AdminDashboard() {
                       {selectedServer.github_url.replace("https://github.com/", "")}
                       <ExternalLink className="h-3 w-3" />
                     </a>
-                  ) : null}
+                  ) : <span className="text-sm text-muted-foreground">Not provided</span>}
                 </div>
 
                 <div>
@@ -387,7 +530,7 @@ export default function AdminDashboard() {
                       View Logo
                       <ExternalLink className="h-3 w-3" />
                     </a>
-                  ) : null}
+                  ) : <span className="text-sm text-muted-foreground">Not provided</span>}
                 </div>
 
                 <div>
@@ -401,9 +544,38 @@ export default function AdminDashboard() {
                       onChange={(e) => setEditedServer({ ...editedServer, contact_email: e.target.value })}
                       className="w-full rounded-md border p-2"
                     />
-                  ) : (
+                  ) : selectedServer.contact_email ? (
                     <span className="text-sm">{selectedServer.contact_email}</span>
-                  )}
+                  ) : <span className="text-sm text-muted-foreground">Not provided</span>}
+                </div>
+              </div>
+              
+              <div className="mt-6 pt-4 border-t">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">Submission Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Submitted on:</span>{" "}
+                    {new Date(selectedServer.created_at).toLocaleString()}
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Status:</span>{" "}
+                    <span className={`
+                      ${selectedServer.status === 'approved' ? 'text-green-600' : ''}
+                      ${selectedServer.status === 'rejected' ? 'text-red-600' : ''}
+                      ${selectedServer.status === 'pending' ? 'text-amber-600' : ''}
+                      font-medium
+                    `}>
+                      {selectedServer.status.charAt(0).toUpperCase() + selectedServer.status.slice(1)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">User ID:</span>{" "}
+                    <span className="font-mono text-xs">{selectedServer.user_id}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Server ID:</span>{" "}
+                    <span className="font-mono text-xs">{selectedServer.id}</span>
+                  </div>
                 </div>
               </div>
             </div>
