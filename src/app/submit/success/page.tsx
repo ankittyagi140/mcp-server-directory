@@ -1,4 +1,5 @@
 import { CheckCircle } from "lucide-react";
+import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -26,22 +27,28 @@ export default function SubmitSuccessPage() {
           </div>
           <h1 className="text-2xl font-bold">Submission Successful!</h1>
           <p className="mt-2 text-muted-foreground">
-            Thank you for submitting your MCP server. Our team will review your submission shortly. and you will be nofify through email. 
+            Thank you for submitting your MCP server. Our team will review your submission and you&apos;ll be notified when the status changes.
           </p>
-          {/* <div className="mt-6 space-y-4">
+          <div className="mt-6 space-y-4">
+            <Link
+              href="/submissions"
+              className="inline-flex h-12 w-full items-center justify-center rounded-full bg-green-600 px-8 text-base font-medium text-white shadow-lg transition-colors hover:bg-green-700 hover:scale-105 transform duration-200"
+            >
+              Track My Submissions
+            </Link>
             <Link
               href="/servers"
-              className="inline-flex h-12 w-full items-center justify-center rounded-full bg-green-600 px-8 text-base font-medium text-white shadow-lg transition-colors hover:bg-green-700 hover:scale-105 transform duration-200"
+              className="inline-flex h-12 w-full items-center justify-center rounded-full border border-gray-300 bg-white px-8 text-base font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-50 hover:scale-105 transform duration-200"
             >
               Browse Servers
             </Link>
             <Link
               href="/"
-              className="inline-flex h-12 w-full items-center justify-center rounded-full border border-gray-300 bg-white px-8 text-base font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-50 hover:scale-105 transform duration-200"
+              className="inline-flex h-12 w-full items-center justify-center text-base font-medium text-gray-500 hover:text-gray-700"
             >
               Return to Home
             </Link>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>

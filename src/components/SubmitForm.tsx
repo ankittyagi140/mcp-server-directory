@@ -109,7 +109,6 @@ export default function SubmitForm() {
         }
       }
       
-      console.log("Submission successful!");
       setSubmitSuccess(true);
       reset();
       

@@ -29,10 +29,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 // Check client initialization
 if (process.env.NODE_ENV !== 'production') {
-  console.info('Supabase client initialized with:');
-  console.info('- URL:', supabaseUrl ? 'Valid URL provided' : 'Missing URL');
-  console.info('- Key:', supabaseAnonKey ? 'Valid key provided' : 'Missing key');
-  
+ 
   // Test connection
   const testConnection = async () => {
     try {
@@ -63,6 +60,7 @@ export type ServerEntry = {
   status: 'pending' | 'approved' | 'rejected';
   features?: string[] | null;
   slug?: string; // This will be generated from the name
+  user_id?: string; // The ID of the user who submitted the server
 };
 
 // Helper function to generate a slug from a server name
@@ -190,5 +188,30 @@ export async function getServerBySlug(slug: string): Promise<ServerEntry | null>
   } catch (err) {
     console.error("Exception finding server by slug:", err);
     return null;
+  }
+}
+
+// Helper function to get all submissions for a user
+export async function getUserSubmissions(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("servers")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching user submissions:", error);
+      return [];
+    }
+    
+    return data.map(server => ({
+      ...server,
+      tags: Array.isArray(server.tags) ? server.tags : server.tags.split(',').map((tag: string) => tag.trim()),
+      slug: generateSlug(server.name)
+    }));
+  } catch (err) {
+    console.error("Exception fetching user submissions:", err);
+    return [];
   }
 } 
