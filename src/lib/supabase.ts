@@ -191,4 +191,28 @@ export async function getServerBySlug(slug: string): Promise<ServerEntry | null>
     console.error("Exception finding server by slug:", err);
     return null;
   }
+}
+
+// Helper function to get all submissions for a user
+export async function getUserSubmissions(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("servers")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching user submissions:", error);
+      return [];
+    }
+    
+    return data.map(server => ({
+      ...server,
+      slug: generateSlug(server.name)
+    }));
+  } catch (err) {
+    console.error("Exception fetching user submissions:", err);
+    return [];
+  }
 } 

@@ -122,6 +122,13 @@ export default function Navbar() {
                   {isUserMenuOpen && (
                     <div className="absolute top-full right-0 mt-2 w-48 rounded-md border bg-background shadow-lg z-50">
                       <div className="py-1">
+                        <Link
+                          href="/submissions"
+                          className="block w-full px-4 py-2 text-left text-sm hover:bg-muted"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          My Submissions
+                        </Link>
                         <button
                           onClick={handleLogout}
                           className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-muted"
@@ -194,6 +201,13 @@ export default function Navbar() {
                     <span className="h-3 w-3 rounded-full bg-green-500 mr-3"></span>
                     <span className="font-medium text-green-800">{user.email?.split("@")[0]}</span>
                   </div>
+                  <Link
+                    href="/submissions"
+                    className="text-base font-medium flex items-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    My Submissions
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center justify-center rounded-full bg-red-100 px-4 py-3 text-base font-medium text-red-700 transition-colors hover:bg-red-200"
