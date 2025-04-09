@@ -1,10 +1,177 @@
 import Link from "next/link";
 import { ArrowRight, Search, Server, Upload, Star} from "lucide-react";
 import FaqSection from "@/components/FaqSection";
+import Script from "next/script";
 
 export default function Home() {
+  // Define the FAQ items for structured data
+  const faqItems = [
+    {
+      "@type": "Question",
+      "name": "What is MCP (Model Context Protocol)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MCP is an open-source protocol developed by Anthropic that enables AI systems like Claude to securely connect with various data sources. It provides a universal standard for AI assistants to access external data, tools, and prompts through a client-server architecture."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are MCP Servers?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MCP Servers are systems that provide context, tools, and prompts to AI clients. They can expose data sources like files, documents, databases, and API integrations, allowing AI assistants to access real-time information in a secure way."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do MCP Servers work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MCP Servers work through a simple client-server architecture. They expose data and tools through a standardized protocol, maintaining secure 1:1 connections with clients inside host applications like Claude Desktop."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What can MCP Servers provide?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "MCP Servers can share resources (files, docs, data), expose tools (API integrations, actions), and provide prompts (templated interactions). They control their own resources and maintain clear system boundaries for security."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Claude use MCP?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude can connect to MCP servers to access external data sources and tools, enhancing its capabilities with real-time information. Currently, this works with local MCP servers, with enterprise remote server support coming soon."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are MCP Servers secure?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, security is built into the MCP protocol. Servers control their own resources, there's no need to share API keys with LLM providers, and the system maintains clear boundaries. Each server manages its own authentication and access control."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is mcp-server-directory.com?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "mcp-server-directory.com is a community-driven platform that collects and organizes third-party MCP Servers. It serves as a central directory where users can discover, share, and learn about various MCP Servers available for AI applications."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I submit my MCP Server to mcp-server-directory.com?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can submit your MCP Server by creating a new issue in our GitHub repository. Click the Submit button in the navigation bar or visit our GitHub issues page directly. Please provide details about your server including its name, description, features, and connection information."
+      }
+    }
+  ];
+
+  // Define structured data for the home page with JSON-LD
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.mcp-server-directory.com/#organization",
+        "name": "MCP Server Directory",
+        "url": "https://www.mcp-server-directory.com/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.mcp-server-directory.com/mcp-server-directory.png",
+          "width": 478,
+          "height": 480
+        },
+        "description": "Discover and share Model Context Protocol Servers for AI applications, development, and integration.",
+        "sameAs": [
+          "https://github.com/ankittyagi140/mcp-server-directory"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.mcp-server-directory.com/#website",
+        "url": "https://www.mcp-server-directory.com/",
+        "name": "MCP Server Directory",
+        "description": "Discover and share Model Context Protocol Servers for AI applications, development, and integration.",
+        "publisher": {
+          "@id": "https://www.mcp-server-directory.com/#organization"
+        },
+        "potentialAction": [
+          {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://www.mcp-server-directory.com/servers?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://www.mcp-server-directory.com/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.mcp-server-directory.com/"
+          }
+        ]
+      },
+      {
+        "@type": "CollectionPage",
+        "@id": "https://www.mcp-server-directory.com/#webpage",
+        "url": "https://www.mcp-server-directory.com/",
+        "name": "MCP Server Directory | Find & Share Model Context Protocol Servers",
+        "description": "Discover and share MCP Servers for AI applications. Browse a comprehensive directory of Model Context Protocol servers with search, filtering, and submission capabilities.",
+        "isPartOf": {
+          "@id": "https://www.mcp-server-directory.com/#website"
+        },
+        "about": {
+          "@id": "https://www.mcp-server-directory.com/#organization"
+        },
+        "breadcrumb": {
+          "@id": "https://www.mcp-server-directory.com/#breadcrumb"
+        },
+        "primaryImageOfPage": {
+          "@type": "ImageObject",
+          "url": "https://www.mcp-server-directory.com/mcp-server-directory.png"
+        },
+        "inLanguage": "en-US",
+        "potentialAction": [
+          {
+            "@type": "ReadAction",
+            "target": ["https://www.mcp-server-directory.com/servers"]
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://www.mcp-server-directory.com/#faqpage",
+        "url": "https://www.mcp-server-directory.com/#faq",
+        "name": "Frequently Asked Questions about MCP Servers",
+        "description": "Common questions and answers about Model Context Protocol and MCP Servers",
+        "isPartOf": {
+          "@id": "https://www.mcp-server-directory.com/#webpage"
+        },
+        "mainEntity": faqItems
+      }
+    ]
+  };
+
   return (
     <div className="flex flex-col items-center">
+      {/* JSON-LD structured data */}
+      <Script id="homepage-structured-data" type="application/ld+json">
+        {JSON.stringify(structuredData)}
+      </Script>
+      
       {/* Hero section */}
       <section className="w-full py-12 sm:py-16 md:py-24 lg:py-32 bg-gradient-to-b from-white to-slate-50 text-slate-900">
         <div className="container px-4 md:px-6">
@@ -150,7 +317,7 @@ export default function Home() {
       </section>
       
       {/* FAQ section */}
-      <section className="bg-white py-12 sm:py-16 md:py-20 border-t border-slate-100">
+      <section id="faq" className="bg-white py-12 sm:py-16 md:py-20 border-t border-slate-100">
         <FaqSection />
       </section>
     </div>
