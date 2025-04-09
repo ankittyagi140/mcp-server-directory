@@ -109,9 +109,12 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <AuthSuccess />
           </Suspense>
-          <Suspense fallback={null}>
-            <RoleDisplay />
-          </Suspense>
+          {/* Only show RoleDisplay in development */}
+          {process.env.NODE_ENV !== 'production' && (
+            <Suspense fallback={null}>
+              <RoleDisplay />
+            </Suspense>
+          )}
         </AuthProvider>
       </body>
     </html>
