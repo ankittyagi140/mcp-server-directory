@@ -3,7 +3,7 @@
 import { useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 
-export default function RoleDisplay() {
+export default function RoleDebug() {
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
   

@@ -5,7 +5,8 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import AdminDashboard from "@/components/AdminDashboard";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, BookOpen, FileText, PlusCircle } from "lucide-react";
+import Link from 'next/link';
 
 // Loading fallback UI for the suspense boundary
 function AdminLoading() {
@@ -52,8 +53,35 @@ export default function AdminPage() {
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
         <p className="text-muted-foreground">
-          Review and manage server submissions.
+          Manage server submissions and blog content.
         </p>
+      </div>
+      
+      {/* Admin quick actions */}
+      <div className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-col items-center justify-center rounded-lg border bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">
+          <BookOpen className="mb-4 h-10 w-10 text-green-600" />
+          <h2 className="mb-2 text-xl font-bold">Blog Management</h2>
+          <p className="mb-4 text-center text-sm text-slate-600">
+            Create and manage blog content and articles.
+          </p>
+          <div className="mt-2 flex flex-col gap-2">
+            <Link
+              href="/admin/blog/new"
+              className="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-green-700"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create New Post
+            </Link>
+            <Link
+              href="/blog"
+              className="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50"
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              View All Posts
+            </Link>
+          </div>
+        </div>
       </div>
       
       <Suspense fallback={<AdminLoading />}>
