@@ -113,6 +113,137 @@ export type ServerEntry = {
   user_id?: string; // The ID of the user who submitted the server
 };
 
+// Blog post type definition
+export type BlogPost = {
+  id: number;
+  created_at: string;
+  updated_at?: string;
+  title: string;
+  content: string;
+  excerpt: string;
+  slug: string;
+  featured_image?: string | null;
+  author_id: string;
+  author_name?: string;
+  status: 'draft' | 'published';
+  tags?: string[];
+};
+
+// Helper function to generate a slug from a blog title
+export function generateBlogSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-')     // Replace spaces with hyphens
+    .replace(/-+/g, '-')      // Replace multiple hyphens with single hyphen
+    .trim();
+}
+
+// Helper function to get blog posts
+export async function getBlogPosts(options?: { 
+  limit?: number; 
+  page?: number; 
+  status?: 'draft' | 'published';
+  tag?: string;
+}) {
+  try {
+    const page = options?.page || 1;
+    const limit = options?.limit || 10;
+    const offset = (page - 1) * limit;
+    
+    let query = supabase
+      .from("blog_posts")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false });
+    
+    // Apply status filter if specified
+    if (options?.status) {
+      query = query.eq("status", options.status);
+    } else {
+      // Default to published posts for frontend
+      query = query.eq("status", "published");
+    }
+    
+    // Apply tag filter if specified
+    if (options?.tag) {
+      query = query.contains("tags", [options.tag]);
+    }
+    
+    // Apply pagination
+    const { data, error, count } = await query
+      .range(offset, offset + limit - 1);
+    
+    if (error) {
+      console.error("Error fetching blog posts:", error);
+      return { posts: [], count: 0 };
+    }
+    
+    return { 
+      posts: data as BlogPost[],
+      count: count || 0
+    };
+  } catch (err) {
+    console.error("Exception fetching blog posts:", err);
+    return { posts: [], count: 0 };
+  }
+}
+
+// Helper function to get a blog post by slug
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  try {
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select(`
+        id,
+        created_at,
+        updated_at,
+        title,
+        content,
+        excerpt,
+        slug,
+        featured_image,
+        author_id,
+        author_name,
+        status,
+        tags
+      `)
+      .eq("slug", slug)
+      .eq("status", "published")
+      .single();
+    
+    if (error) {
+      console.error("Error fetching blog post by slug:", error);
+      return null;
+    }
+    
+    return data as BlogPost;
+  } catch (err) {
+    console.error("Exception fetching blog post by slug:", err);
+    return null;
+  }
+}
+
+// Helper function to get user's blog posts
+export async function getUserBlogPosts(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("author_id", userId)
+      .order("created_at", { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching user blog posts:", error);
+      return [];
+    }
+    
+    return data as BlogPost[];
+  } catch (err) {
+    console.error("Exception fetching user blog posts:", err);
+    return [];
+  }
+}
+
 // Helper function to generate a slug from a server name
 export function generateSlug(name: string): string {
   return name

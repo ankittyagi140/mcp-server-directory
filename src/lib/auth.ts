@@ -70,10 +70,10 @@ export const signOut = async () => {
     
     if (error) throw error;
     
-    // Refresh the page after signout to clear any URL parameters
+    // Refresh the entire page after signout to clear cached data and reset app state
     if (typeof window !== 'undefined') {
       // Remove any hash or query parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
+      window.location.href = window.location.origin;
     }
     
     return { error: null };

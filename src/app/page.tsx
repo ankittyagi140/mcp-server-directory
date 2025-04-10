@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Search, Server, Upload, Star} from "lucide-react";
 import FaqSection from "@/components/FaqSection";
 import Script from "next/script";
+import RoleDebug from '@/components/RoleDebug';
 
 export default function Home() {
   // Define the FAQ items for structured data
@@ -320,6 +321,7 @@ export default function Home() {
       <section id="faq" className="bg-white py-12 sm:py-16 md:py-20 border-t border-slate-100">
         <FaqSection />
       </section>
+      <RoleDebug />
     </div>
   );
 }
