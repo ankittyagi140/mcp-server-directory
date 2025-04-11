@@ -6,6 +6,7 @@ import { supabase, getServerBySlug, generateSlug } from "@/lib/supabase";
 import type { ServerEntry } from "@/lib/supabase";
 import type { Metadata } from "next";
 import Script from "next/script";
+import ServerCard from "@/components/ServerCard";
 
 // Ensure tags and features are always arrays
 function normalizeArrayData(data: Omit<ServerEntry, 'tags' | 'features'> & { 
@@ -194,6 +195,15 @@ export default async function ServerDetailPage({ params }: Props) {
     ...(server.github_url && { "codeRepository": server.github_url })
   };
 
+  // Get recommended servers
+  const { data: recommendedServers } = await supabase
+    .from("servers")
+    .select("*")
+    .eq("status", "approved")
+    .neq("id", server.id) // Exclude current server
+    .order("created_at", { ascending: false })
+    .limit(9);
+
   return (
     <>
       <Script id="server-structured-data" type="application/ld+json">
@@ -314,6 +324,16 @@ export default async function ServerDetailPage({ params }: Props) {
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Recommendations Section */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold mb-6">Recommended Servers</h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {recommendedServers?.map((recommendedServer) => (
+              <ServerCard key={recommendedServer.id} server={recommendedServer} />
+            ))}
           </div>
         </div>
       </div>

@@ -1,16 +1,17 @@
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import ServerCard from "@/components/ServerCard";
-import { supabase } from "@/lib/supabase";
-import type { ServerEntry } from "@/lib/supabase";
-import type { Metadata } from "next";
-import { Suspense } from "react";
 import PaginationControls from "@/components/PaginationControls";
+import SearchForm from "@/components/SearchForm";
+import type { Metadata } from "next";
+import type { ServerEntry } from "@/lib/supabase";
 
 // Export metadata for SEO
 export const metadata: Metadata = {
-  title: "MCP Server Directory | Browse Model Context Protocol Servers",
-  description: "Discover and explore Model Context Protocol (MCP) servers with search, filtering by tags, and detailed server information. The most comprehensive MCP server list.",
-  keywords: ["MCP servers", "Model Context Protocol", "MCP directory", "Claude integration", "AI tools", "server listings", "MCP implementations"],
+  title: "MCP Servers | Find and Join Model Context Protocol Servers | MCP Directory",
+  description:
+    "Browse and join MCP servers. Find the perfect Model Context Protocol server for your playstyle.",
+  keywords: "MCP servers, Model Context Protocol servers, server list, join server",
   openGraph: {
     title: "Browse MCP Servers | Model Context Protocol Directory",
     description: "Find the perfect Model Context Protocol server for your AI applications. Filter by tags, features, and more.",
@@ -18,128 +19,120 @@ export const metadata: Metadata = {
   },
 };
 
-// Default pagination values
-const DEFAULT_PAGE_SIZE = 9;
-const DEFAULT_PAGE = 1;
+const ITEMS_PER_PAGE = 12;
 
-async function getServers(page: number = DEFAULT_PAGE, pageSize: number = DEFAULT_PAGE_SIZE) {
-  // Calculate offset
-  const offset = (page - 1) * pageSize;
+async function getServers(page: number, searchQuery?: string) {
+  const from = (page - 1) * ITEMS_PER_PAGE;
+  const to = from + ITEMS_PER_PAGE - 1;
 
-  // Get servers with pagination
-  const { data, error, count } = await supabase
+  let query = supabase
     .from("servers")
     .select("*", { count: "exact" })
     .eq("status", "approved")
     .order("created_at", { ascending: false })
-    .range(offset, offset + pageSize - 1);
+    .range(from, to);
+
+  if (searchQuery && searchQuery.trim()) {
+    query = query.or(
+      `name.ilike.%${searchQuery.trim()}%,description.ilike.%${searchQuery.trim()}%,tags.ilike.%${searchQuery.trim()}%`
+    );
+  }
+
+  const { data, error, count } = await query;
 
   if (error) {
     console.error("Error fetching servers:", error);
-    return { servers: [], count: 0 };
+    return { servers: [], totalCount: 0 };
   }
 
-  return { 
+  return {
     servers: data as ServerEntry[],
-    count: count || 0
+    totalCount: count || 0,
   };
 }
 
 interface Props {
-  searchParams: Promise<{ 
-    page?: string | string[];
-    pageSize?: string | string[];
-  }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function ServersPage({ searchParams }: Props) {
-  // Safely access params
-  const params = await searchParams;
-  
-  // Extract and convert pagination parameters
-  let page = DEFAULT_PAGE;
-  let pageSize = DEFAULT_PAGE_SIZE;
-  
-  // Process page parameter if it exists
-  if (params.page) {
-    const pageValue = Array.isArray(params.page) ? params.page[0] : params.page;
-    const parsedPage = parseInt(pageValue, 10);
-    if (!isNaN(parsedPage) && parsedPage > 0) {
-      page = parsedPage;
-    }
-  }
-  
-  // Process pageSize parameter if it exists
-  if (params.pageSize) {
-    const pageSizeValue = Array.isArray(params.pageSize) ? params.pageSize[0] : params.pageSize;
-    const parsedPageSize = parseInt(pageSizeValue, 10);
-    if (!isNaN(parsedPageSize) && parsedPageSize > 0) {
-      pageSize = parsedPageSize;
-    }
-  }
-
-  // Fetch servers with pagination
-  const { servers, count } = await getServers(page, pageSize);
-  
-  // Calculate total pages
-  const totalPages = Math.max(1, Math.ceil(count / pageSize));
+  const {page, search} = await searchParams;
+  const currentPage = Number(page) || 1;
+  const searchQuery = search as string;
+  const { servers, totalCount } = await getServers(currentPage, searchQuery);
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   // Generate base URL for pagination
-  const baseUrl = "/servers";
+  const baseUrl = searchQuery ? `/servers?search=${encodeURIComponent(searchQuery)}` : "/servers";
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">MCP Servers</h1>
-          <p className="text-muted-foreground">
-            Browse and discover Model Context Protocol servers.
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-4">Model Context Protocol Servers</h1>
+        <p className="text-lg text-gray-600">
+          Discover and join the best Model Context Protocol servers
+        </p>
       </div>
 
-      <div className="mt-8">
-        {servers.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-            <h2 className="text-xl font-semibold">No servers found</h2>
-            <p className="mt-2 text-muted-foreground">
-              There are no servers available at the moment.
-            </p>
+      <div className="mb-8">
+        <SearchForm />
+        {searchQuery && (
+          <div className="mt-4 text-center">
             <Link
-              href="/submit"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-green-600 px-8 text-base font-medium text-white shadow-lg transition-colors hover:bg-green-700 hover:scale-105 transform duration-200 mt-6"
+              href="/servers"
+              className="inline-flex items-center justify-center rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             >
-              Submit a Server
+              View All Servers
             </Link>
           </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {servers.map((server) => (
-                <ServerCard key={server.id} server={server} />
-              ))}
-            </div>
-            
-            {/* Pagination display and controls */}
-            <div className="mt-8 flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
-              <div className="text-sm text-muted-foreground">
-                Showing <span className="font-medium">{Math.min((page - 1) * pageSize + 1, count)}</span> to{" "}
-                <span className="font-medium">{Math.min(page * pageSize, count)}</span> of{" "}
-                <span className="font-medium">{count}</span> servers
-              </div>
-              
-              <Suspense fallback={<div>Loading pagination...</div>}>
-                <PaginationControls 
-                  currentPage={page}
-                  totalPages={totalPages}
-                  pageSize={pageSize}
-                  basePath={baseUrl}
-                />
-              </Suspense>
-            </div>
-          </>
         )}
       </div>
+
+      {servers.length === 0 ? (
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-semibold mb-4">
+            {searchQuery
+              ? "No servers found matching your search"
+              : "No servers available yet"}
+          </h2>
+          <p className="text-gray-600 mb-4">
+            {searchQuery
+              ? "Try adjusting your search terms"
+              : "Check back later for new servers"}
+          </p>
+          {!searchQuery && (
+            <Link
+              href="/servers/add"
+              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Add Your Server
+            </Link>
+          )}
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {servers.map((server) => (
+              <ServerCard key={server.id} server={server} />
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
+            <div className="text-sm text-muted-foreground">
+              Showing <span className="font-medium">{Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, totalCount)}</span> to{" "}
+              <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}</span> of{" "}
+              <span className="font-medium">{totalCount}</span> servers
+            </div>
+
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={ITEMS_PER_PAGE}
+              basePath={baseUrl}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 } 

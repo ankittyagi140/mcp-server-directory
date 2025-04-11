@@ -31,7 +31,7 @@ export default function PrivacyPage() {
           <p>We may collect information about you in various ways, including:</p>
           <ul>
             <li><strong>Personal Data</strong>: When you register an account, we may collect your name, email address, and Discord ID.</li>
-            <li><strong>Server Information</strong>: Information about Minecraft servers you submit to our directory.</li>
+            <li><strong>Server Information</strong>: Information about Modal Context Protocal servers you submit to our directory.</li>
             <li><strong>Usage Data</strong>: Information on how you use our website, including your IP address, browser type, pages visited, time spent on pages, and other usage statistics.</li>
             <li><strong>Cookies and Tracking Technologies</strong>: We use cookies and similar tracking technologies to track activity on our website and store certain information.</li>
           </ul>
