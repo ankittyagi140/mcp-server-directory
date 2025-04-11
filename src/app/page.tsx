@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Search, Server, Upload, Star} from "lucide-react";
+import { ArrowRight, Server, Star, Shield, LineChart, Settings, Bell, LayoutDashboard } from "lucide-react";
 import FaqSection from "@/components/FaqSection";
 import Script from "next/script";
 import RoleDebug from '@/components/RoleDebug';
@@ -255,32 +255,76 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 sm:gap-8 py-8 sm:py-12 md:grid-cols-3">
-            <div className="flex flex-col items-center space-y-3 sm:space-y-4 rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:translate-y-[-4px]">
-              <div className="rounded-full bg-green-50 p-3 sm:p-4">
-                <Server className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
+              <div className="flex items-center space-x-4">
+                <div className="rounded-full bg-green-100 p-3 dark:bg-green-900/20">
+                  <Server className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <h3 className="text-lg font-semibold">Server Management</h3>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900">Server Listings</h3>
-              <p className="text-center text-sm sm:text-base text-slate-600">
-                Browse comprehensive listings with server details, endpoints, and features.
+              <p className="mt-4 text-muted-foreground">
+                Easily manage your server settings, monitor performance, and handle user requests all in one place.
               </p>
             </div>
-            <div className="flex flex-col items-center space-y-3 sm:space-y-4 rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:translate-y-[-4px]">
-              <div className="rounded-full bg-green-50 p-3 sm:p-4">
-                <Search className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+
+            <div className="rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
+              <div className="flex items-center space-x-4">
+                <div className="rounded-full bg-blue-100 p-3 dark:bg-blue-900/20">
+                  <Shield className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold">Secure Authentication</h3>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900">Search & Filter</h3>
-              <p className="text-center text-sm sm:text-base text-slate-600">
-                Find servers by tags, features, or keywords with powerful search capabilities.
+              <p className="mt-4 text-muted-foreground">
+                Built-in authentication system with support for multiple providers and role-based access control.
               </p>
             </div>
-            <div className="flex flex-col items-center space-y-3 sm:space-y-4 rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:translate-y-[-4px]">
-              <div className="rounded-full bg-green-50 p-3 sm:p-4">
-                <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+
+            <div className="rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
+              <div className="flex items-center space-x-4">
+                <div className="rounded-full bg-purple-100 p-3 dark:bg-purple-900/20">
+                  <LineChart className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <h3 className="text-lg font-semibold">Analytics Dashboard</h3>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900">Server Submission</h3>
-              <p className="text-center text-sm sm:text-base text-slate-600">
-                Submit your own MCP servers to the directory using our simple form.
+              <p className="mt-4 text-muted-foreground">
+                Track server performance, user engagement, and other key metrics with our comprehensive analytics.
+              </p>
+            </div>
+
+            <div className="rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
+              <div className="flex items-center space-x-4">
+                <div className="rounded-full bg-amber-100 p-3 dark:bg-amber-900/20">
+                  <Settings className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <h3 className="text-lg font-semibold">Customizable Settings</h3>
+              </div>
+              <p className="mt-4 text-muted-foreground">
+                Fine-tune your server configuration with a wide range of customizable options and settings.
+              </p>
+            </div>
+
+            <div className="rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
+              <div className="flex items-center space-x-4">
+                <div className="rounded-full bg-red-100 p-3 dark:bg-red-900/20">
+                  <Bell className="h-6 w-6 text-red-600 dark:text-red-400" />
+                </div>
+                <h3 className="text-lg font-semibold">Real-time Notifications</h3>
+              </div>
+              <p className="mt-4 text-muted-foreground">
+                Stay informed with instant notifications about server status, user activities, and important updates.
+              </p>
+            </div>
+
+            <div className="rounded-lg border bg-card p-6 text-card-foreground shadow-sm">
+              <div className="flex items-center space-x-4">
+                <div className="rounded-full bg-indigo-100 p-3 dark:bg-indigo-900/20">
+                  <LayoutDashboard className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <h3 className="text-lg font-semibold">Dedicated Dashboard</h3>
+              </div>
+              <p className="mt-4 text-muted-foreground">
+                Access a powerful admin dashboard to manage servers, users, and content with ease.
               </p>
             </div>
           </div>
