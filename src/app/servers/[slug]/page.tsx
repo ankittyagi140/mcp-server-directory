@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ExternalLink, Github, Mail, Server } from "lucide-react";
+import { ExternalLink, Mail, Server, Github } from "lucide-react";
 import { supabase, getServerBySlug, generateSlug } from "@/lib/supabase";
 import type { ServerEntry } from "@/lib/supabase";
 import type { Metadata } from "next";
 import Script from "next/script";
 import ServerCard from "@/components/ServerCard";
+import ShareButtons from "../../../components/ShareButtons";
 
 // Ensure tags and features are always arrays
 function normalizeArrayData(data: Omit<ServerEntry, 'tags' | 'features'> & { 
@@ -28,9 +29,11 @@ function normalizeArrayData(data: Omit<ServerEntry, 'tags' | 'features'> & {
   };
 }
 
-type Props = {
-  params: Promise<{ slug: string }>;
-};
+interface Props {
+  params: Promise<{
+    slug: string;
+  }>;
+}
 
 // Helper to get server by ID or slug
 async function getServerByIdOrSlug(slug: string): Promise<ServerEntry | null> {
@@ -144,20 +147,14 @@ export async function generateStaticParams() {
   }
 }
 
-export default async function ServerDetailPage({ params }: Props) {
+export default async function ServerPage({ params }: Props) {
   const { slug } = await params;
-  
-  if (!slug) {
-    notFound();
-  }
-
-  // Get the server
   const server = await getServerByIdOrSlug(slug);
   
   if (!server) {
     notFound();
   }
-  
+
   // Create slug for canonical URL
   const serverSlug = generateSlug(server.name);
   
@@ -323,6 +320,12 @@ export default async function ServerDetailPage({ params }: Props) {
                   Added on {new Date(server.created_at).toLocaleDateString()}
                 </span>
               </div>
+            </div>
+            
+            {/* Social Sharing */}
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <p className="text-sm font-medium mb-2">Share this server:</p>
+              <ShareButtons title={server.name} slug={slug} />
             </div>
           </div>
         </div>

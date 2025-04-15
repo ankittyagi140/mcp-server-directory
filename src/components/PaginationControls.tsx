@@ -102,7 +102,7 @@ export default function PaginationControls({
         </span>
 
         {/* Page size dropdown - still available for single page */}
-        <select
+        {/* <select
           className="ml-4 h-9 rounded-md border border-gray-300 bg-white px-2 text-sm"
           value={pageSize}
           onChange={(e) => {
@@ -115,7 +115,7 @@ export default function PaginationControls({
           <option value="18">18 per page</option>
           <option value="27">27 per page</option>
           <option value="36">36 per page</option>
-        </select>
+        </select> */}
       </nav>
     );
   }

@@ -14,16 +14,16 @@ export async function middleware(req: NextRequest) {
   const accessToken = req.cookies.get('sb-access-token')?.value;
   const refreshToken = req.cookies.get('sb-refresh-token')?.value;
   
-  console.log('Auth cookies debug:', {
-    hasAccessToken: !!accessToken,
-    hasRefreshToken: !!refreshToken,
-    url: req.url,
-    headers: {
-      host: req.headers.get('host'),
-      origin: req.headers.get('origin'),
-      referer: req.headers.get('referer'),
-    },
-  });
+//   console.log('Auth cookies debug:', {
+//     hasAccessToken: !!accessToken,
+//     hasRefreshToken: !!refreshToken,
+//     url: req.url,
+//     headers: {
+//       host: req.headers.get('host'),
+//       origin: req.headers.get('origin'),
+//       referer: req.headers.get('referer'),
+//     },
+//   });
   
   // Use an enhanced Supabase client
   const supabase = createClient(supabaseUrl, supabaseKey, {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { PlusCircle, Menu, X, LayoutDashboard, FileText, Server, BookOpen } from "lucide-react";
+import { PlusCircle, Menu, X, LayoutDashboard, FileText, Server, BookOpen, Home } from "lucide-react";
 import { useAuth, signOut } from "@/lib/auth";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
@@ -79,6 +79,13 @@ export default function Navbar() {
         </div>
         <div className="ml-auto flex items-center space-x-2 md:space-x-4">
           <nav className="hidden md:flex gap-6">
+            <Link
+              href="/"
+              className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Home className="mr-2 h-4 w-4" />
+              Home
+            </Link>
             <Link
               href="/servers"
               className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -206,6 +213,14 @@ export default function Navbar() {
         <div className="fixed inset-0 top-16 z-40 bg-white md:hidden" ref={menuRef}>
           <div className="container py-6 bg-white">
             <nav className="flex flex-col space-y-6">
+              <Link
+                href="/"
+                className="text-base font-medium flex items-center"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Home className="mr-2 h-5 w-5" />
+                Home
+              </Link>
               <Link
                 href="/servers"
                 className="text-base font-medium flex items-center"
