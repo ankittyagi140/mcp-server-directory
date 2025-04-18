@@ -3,17 +3,31 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { getUserSubmissions } from "@/lib/supabase";
-import type { ServerEntry } from "@/lib/supabase";
-import { ClockIcon, CheckCircle, XCircle, ArrowRight, Loader2 } from "lucide-react";
+import type { ServerEntry, ClientEntry } from "@/lib/supabase";
+import { ClockIcon, CheckCircle, XCircle, ArrowRight, Loader2, Server, Monitor } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 type TabType = 'pending' | 'approved' | 'rejected';
+type SubmissionType = 'all' | 'servers' | 'clients';
+
+type SubmissionEntry = ServerEntry | ClientEntry;
+
+// Type guard to check if an entry is a ServerEntry
+function isServerEntry(entry: SubmissionEntry): entry is ServerEntry {
+  return (entry as ServerEntry).endpoint_url !== undefined;
+}
+
+// Type guard to check if an entry is a ClientEntry
+function isClientEntry(entry: SubmissionEntry): entry is ClientEntry {
+  return (entry as ClientEntry).client_url !== undefined;
+}
 
 export default function UserSubmissions() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('pending');
-  const [submissions, setSubmissions] = useState<ServerEntry[]>([]);
+  const [submissionType, setSubmissionType] = useState<SubmissionType>('all');
+  const [submissions, setSubmissions] = useState<SubmissionEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({
@@ -32,16 +46,24 @@ export default function UserSubmissions() {
       try {
         const allSubmissions = await getUserSubmissions(user.id);
         
+        // Filter by type if needed
+        let filteredSubmissions = allSubmissions;
+        if (submissionType === 'servers') {
+          filteredSubmissions = allSubmissions.filter(isServerEntry);
+        } else if (submissionType === 'clients') {
+          filteredSubmissions = allSubmissions.filter(isClientEntry);
+        }
+        
         // Calculate counts for each status
         const counts = {
-          pending: allSubmissions.filter(sub => sub.status === 'pending').length,
-          approved: allSubmissions.filter(sub => sub.status === 'approved').length,
-          rejected: allSubmissions.filter(sub => sub.status === 'rejected').length
+          pending: filteredSubmissions.filter(sub => sub.status === 'pending').length,
+          approved: filteredSubmissions.filter(sub => sub.status === 'approved').length,
+          rejected: filteredSubmissions.filter(sub => sub.status === 'rejected').length
         };
         setStats(counts);
         
         // Filter submissions based on active tab
-        setSubmissions(allSubmissions.filter(submission => submission.status === activeTab));
+        setSubmissions(filteredSubmissions.filter(submission => submission.status === activeTab));
       } catch (err) {
         console.error("Error fetching submissions:", err);
         setError("Failed to load your submissions. Please try again.");
@@ -51,7 +73,7 @@ export default function UserSubmissions() {
     }
     
     fetchSubmissions();
-  }, [user, activeTab]);
+  }, [user, activeTab, submissionType]);
 
   if (isLoading) {
     return (
@@ -77,6 +99,13 @@ export default function UserSubmissions() {
     { id: 'rejected', label: 'Rejected', icon: <XCircle className="h-4 w-4 mr-1" />, count: stats.rejected, bgColor: 'bg-red-100', textColor: 'text-red-800', borderColor: 'border-red-500' }
   ];
 
+  // Type filter definitions
+  const typeFilters = [
+    { id: 'all', label: 'All Submissions' },
+    { id: 'servers', label: 'Servers', icon: <Server className="h-4 w-4 mr-1" /> },
+    { id: 'clients', label: 'Clients', icon: <Monitor className="h-4 w-4 mr-1" /> }
+  ];
+
   const getEmptyStateForTab = () => {
     return (
       <div className="text-center py-12 px-4">
@@ -95,7 +124,7 @@ export default function UserSubmissions() {
           href="/submit" 
           className="inline-flex h-10 items-center justify-center rounded-full bg-green-600 px-6 text-sm font-medium text-white shadow-lg transition-colors hover:bg-green-700"
         >
-          Submit a Server
+          Submit to Directory
         </Link>
       </div>
     );
@@ -103,7 +132,27 @@ export default function UserSubmissions() {
 
   return (
     <div className="space-y-6">
-      {/* Tabs with explicit styling */}
+      {/* Type filter */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {typeFilters.map((filter) => (
+          <button
+            key={filter.id}
+            onClick={() => setSubmissionType(filter.id as SubmissionType)}
+            className={`
+              inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium transition-colors
+              ${submissionType === filter.id ? 
+                'bg-green-100 text-green-800 border border-green-300' : 
+                'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }
+            `}
+          >
+            {filter.icon}
+            {filter.label}
+          </button>
+        ))}
+      </div>
+      
+      {/* Status tabs */}
       <div className="flex flex-wrap gap-2 sm:gap-0 border-b border-gray-200">
         {tabs.map((tab) => (
           <button
@@ -163,7 +212,16 @@ export default function UserSubmissions() {
                   
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
-                      <h3 className="font-semibold text-lg">{submission.name}</h3>
+                      <div className="flex items-center">
+                        <h3 className="font-semibold text-lg">{submission.name}</h3>
+                        <span className="inline-flex items-center ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                          {isServerEntry(submission) ? (
+                            <><Server className="h-3 w-3 mr-1" /> Server</>
+                          ) : (
+                            <><Monitor className="h-3 w-3 mr-1" /> Client</>
+                          )}
+                        </span>
+                      </div>
                       <StatusBadge status={submission.status} />
                     </div>
                     
@@ -189,6 +247,13 @@ export default function UserSubmissions() {
                     
                     <div className="mt-3 pt-3 border-t text-sm text-slate-500">
                       <p>Submitted on {new Date(submission.created_at).toLocaleDateString()}</p>
+                      <p className="mt-1">
+                        {isServerEntry(submission) ? (
+                          <>Endpoint: <a href={submission.endpoint_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate block">{submission.endpoint_url}</a></>
+                        ) : (
+                          <>URL: <a href={(submission as ClientEntry).client_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate block">{(submission as ClientEntry).client_url}</a></>
+                        )}
+                      </p>
                     </div>
                   </div>
                 </div>

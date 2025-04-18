@@ -28,7 +28,8 @@ const DEFAULT_PAGE = 1;
 async function isUserAdmin() {
   try {
     // Create supabase client correctly
-    const supabase = createServerComponentClient({ cookies });
+    const cookieStore = cookies();
+    const supabase = createServerComponentClient({ cookies: () => cookieStore });
     
     const { data: { user } } = await supabase.auth.getUser();
     

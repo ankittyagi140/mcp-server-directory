@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight, Server, Star, Shield, LineChart, Settings, Bell, LayoutDashboard } from "lucide-react";
 import FaqSection from "@/components/FaqSection";
 import Script from "next/script";
-import RoleDebug from '@/components/RoleDebug';
 
 export default function Home() {
   // Define the FAQ items for structured data
@@ -179,10 +178,10 @@ export default function Home() {
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2 sm:space-y-4 max-w-4xl">
               <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight">
-                MCP Server <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">Directory</span>
+                MCP <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">Directory</span>
               </h1>
               <p className="mx-auto max-w-[800px] text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-slate-700 px-1">
-                Discover and share Model Context Protocol Servers for AI applications, development, and integration.
+                Discover and share Model Context Protocol Servers and Clients for AI applications, development, and integration.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 mt-6 w-full max-w-md mx-auto z-10 relative">
@@ -190,13 +189,13 @@ export default function Home() {
                 href="/servers" 
                 className="w-full sm:w-auto inline-flex h-11 md:h-12 items-center justify-center rounded-full bg-green-600 px-5 sm:px-8 text-sm sm:text-base font-medium text-white shadow-lg transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 touch-manipulation z-10 relative"
               >
-                Browse Servers
+                Browse Directory <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
               <Link 
                 href="/submit" 
                 className="w-full sm:w-auto inline-flex h-11 md:h-12 items-center justify-center rounded-full bg-white border border-slate-200 px-5 sm:px-8 text-sm sm:text-base font-medium text-slate-800 shadow-lg transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 touch-manipulation z-10 relative"
               >
-                Submit Server
+                Submit
               </Link>
             </div>
             
@@ -340,7 +339,7 @@ export default function Home() {
                 Ready to Explore the MCP Ecosystem?
               </h2>
               <p className="mx-auto max-w-[600px] text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 px-1">
-                Discover all available MCP servers or add your own to the directory. Join our growing community today.
+                Discover all available MCP servers and clients or add your own to the directory. Join our growing community today.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto z-10 relative mt-2">
@@ -348,13 +347,13 @@ export default function Home() {
                 href="/servers" 
                 className="w-full sm:w-auto inline-flex h-11 md:h-12 items-center justify-center rounded-full bg-green-600 px-5 sm:px-8 text-sm sm:text-base font-medium text-white shadow-lg transition-colors hover:bg-green-700 z-10 relative"
               >
-                Browse All Servers <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+                Browse Directory <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
               <Link 
                 href="/submit" 
                 className="w-full sm:w-auto inline-flex h-11 md:h-12 items-center justify-center rounded-full bg-white border border-slate-200 px-5 sm:px-8 text-sm sm:text-base font-medium text-slate-800 shadow-lg transition-colors hover:bg-slate-50 z-10 relative"
               >
-                Submit a Server
+                Submit
               </Link>
             </div>
           </div>
@@ -365,7 +364,6 @@ export default function Home() {
       <section id="faq" className="bg-white py-12 sm:py-16 md:py-20 border-t border-slate-100">
         <FaqSection />
       </section>
-      <RoleDebug />
     </div>
   );
 }

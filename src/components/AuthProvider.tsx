@@ -24,14 +24,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         if (error) {
           console.error('Error getting initial session:', error);
           throw error;
-        }
-        
-        if (data.session) {
-          console.log("Found active session for user:", data.session.user.email);
-        } else {
-          console.log("No active session found");
-        }
-        
+        }        
         setSession({
           user: data.session?.user ? {
             id: data.session.user.id,
@@ -50,9 +43,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        console.log(`Auth event: ${event}`, newSession?.user?.email || 'No user');
-        
+      (event, newSession) => {        
         // Set new session data
         setSession({
           user: newSession?.user ? {

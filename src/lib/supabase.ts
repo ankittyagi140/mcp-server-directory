@@ -107,10 +107,35 @@ export type ServerEntry = {
   logo_url?: string | null;
   github_url?: string | null;
   contact_email?: string | null;
+  twitter_url?: string | null;
+  reddit_url?: string | null;
+  linkedin_url?: string | null;
+  instagram_url?: string | null;
   status: 'pending' | 'approved' | 'rejected';
   features?: string[] | null;
   slug?: string; // This will be generated from the name
   user_id?: string; // The ID of the user who submitted the server
+};
+
+export type ClientEntry = {
+  id: number;
+  created_at: string;
+  name: string;
+  description: string;
+  client_url: string;
+  tags: string[];
+  logo_url?: string | null;
+  github_url?: string | null;
+  contact_email?: string | null;
+  twitter_url?: string | null;
+  reddit_url?: string | null;
+  linkedin_url?: string | null;
+  instagram_url?: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  capabilities?: string[] | null;
+  compatibility?: string[] | null;
+  slug?: string; // This will be generated from the name
+  user_id?: string; // The ID of the user who submitted the client
 };
 
 // Blog post type definition
@@ -375,24 +400,173 @@ export async function getServerBySlug(slug: string): Promise<ServerEntry | null>
 // Helper function to get all submissions for a user
 export async function getUserSubmissions(userId: string) {
   try {
-    const { data, error } = await supabase
+    // Fetch server submissions
+    const { data: serverData, error: serverError } = await supabase
       .from("servers")
       .select("*")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
     
-    if (error) {
-      console.error("Error fetching user submissions:", error);
+    if (serverError) {
+      console.error("Error fetching user server submissions:", serverError);
       return [];
     }
     
-    return data.map(server => ({
+    // Fetch client submissions
+    const { data: clientData, error: clientError } = await supabase
+      .from("clients")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    
+    if (clientError) {
+      console.error("Error fetching user client submissions:", clientError);
+      // Return only server data if client data fetch fails
+      return serverData.map(server => ({
+        ...server,
+        tags: Array.isArray(server.tags) ? server.tags : server.tags.split(',').map((tag: string) => tag.trim()),
+        slug: generateSlug(server.name)
+      }));
+    }
+    
+    // Combine and process both server and client data
+    const serverSubmissions = serverData.map(server => ({
       ...server,
       tags: Array.isArray(server.tags) ? server.tags : server.tags.split(',').map((tag: string) => tag.trim()),
       slug: generateSlug(server.name)
     }));
+    
+    const clientSubmissions = clientData.map(client => ({
+      ...client,
+      tags: Array.isArray(client.tags) ? client.tags : client.tags.split(',').map((tag: string) => tag.trim()),
+      slug: generateSlug(client.name)
+    }));
+    
+    // Combine both sets of submissions and sort by creation date (newest first)
+    const allSubmissions = [...serverSubmissions, ...clientSubmissions];
+    return allSubmissions.sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
   } catch (err) {
     console.error("Exception fetching user submissions:", err);
     return [];
+  }
+}
+
+// Helper to get a client by slug
+export async function getClientBySlug(slug: string): Promise<ClientEntry | null> {
+  try {
+    // Console log for debugging
+    console.log(`Looking for client with slug: ${slug}`);
+    
+    // First try to find client with an exact slug match
+    const { data: exactMatch, error: exactMatchError } = await supabase
+      .from("clients")
+      .select("*")
+      .eq("status", "approved");
+      
+    if (exactMatchError) {
+      console.error("Error fetching clients for slug match:", exactMatchError);
+      return null;
+    }
+    
+    // Try to find exact slug match
+    if (exactMatch && exactMatch.length > 0) {
+      const clientMatch = exactMatch.find(client => 
+        generateSlug(client.name).toLowerCase() === slug.toLowerCase()
+      );
+      
+      if (clientMatch) {
+        console.log(`Found exact match for slug '${slug}': ${clientMatch.name}`);
+        return {
+          ...clientMatch,
+          slug: generateSlug(clientMatch.name)
+        };
+      }
+      
+      // If no exact match, try a partial match (slug is part of the name or vice versa)
+      const partialMatch = exactMatch.find(client => {
+        const clientSlug = generateSlug(client.name).toLowerCase();
+        return clientSlug.includes(slug.toLowerCase()) || slug.toLowerCase().includes(clientSlug);
+      });
+      
+      if (partialMatch) {
+        console.log(`Found partial match for slug '${slug}': ${partialMatch.name}`);
+        return {
+          ...partialMatch,
+          slug: generateSlug(partialMatch.name)
+        };
+      }
+    }
+    
+    // If no exact or partial match, try a fuzzy match on tokenized parts of the slug
+    const slugParts = slug.split('-').filter(part => part.length > 2);
+    
+    if (slugParts.length === 0) {
+      console.log(`No valid parts in slug: ${slug}`);
+      return null;
+    }
+    
+    // Create a query looking for clients that might match any part of the slug
+    let fuzzyQuery = supabase
+      .from("clients")
+      .select("*")
+      .eq("status", "approved");
+    
+    // Add ilike condition for the first part
+    fuzzyQuery = fuzzyQuery.ilike("name", `%${slugParts[0]}%`);
+    
+    const { data: fuzzyMatches, error: fuzzyError } = await fuzzyQuery;
+    
+    if (fuzzyError || !fuzzyMatches || fuzzyMatches.length === 0) {
+      // Try one more query with the entire slug as a search term
+      const { data: globalMatches, error: globalError } = await supabase
+        .from("clients")
+        .select("*")
+        .eq("status", "approved")
+        .ilike("name", `%${slug.replace(/-/g, '%')}%`)
+        .limit(5);
+        
+      if (!globalError && globalMatches && globalMatches.length > 0) {
+        // Find the closest match based on string similarity
+        const bestMatch = globalMatches[0]; // Simplify by taking the first match
+        console.log(`Found global match for slug '${slug}': ${bestMatch.name}`);
+        
+        return {
+          ...bestMatch,
+          slug: generateSlug(bestMatch.name)
+        };
+      }
+      
+      console.log(`No fuzzy matches found for slug parts: ${slugParts.join(', ')}`);
+      return null;
+    }
+    
+    // Find the best match by comparing names
+    // Sort by most slug parts matched
+    const scoredMatches = fuzzyMatches.map(client => {
+      const clientName = client.name.toLowerCase();
+      const matchScore = slugParts.filter(part => 
+        clientName.includes(part)
+      ).length;
+      
+      return { client, score: matchScore };
+    }).sort((a, b) => b.score - a.score);
+    
+    if (scoredMatches.length > 0 && scoredMatches[0].score > 0) {
+      const bestMatch = scoredMatches[0].client;
+      console.log(`Found fuzzy match for slug '${slug}': ${bestMatch.name} (score: ${scoredMatches[0].score})`);
+      
+      return {
+        ...bestMatch,
+        slug: generateSlug(bestMatch.name)
+      };
+    }
+    
+    console.log(`No matches found for slug: ${slug}`);
+    return null;
+  } catch (err) {
+    console.error("Exception finding client by slug:", err);
+    return null;
   }
 } 

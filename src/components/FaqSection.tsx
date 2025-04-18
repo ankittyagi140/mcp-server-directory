@@ -92,21 +92,22 @@ const faqItems: FaqItem[] = [
     answer: (
       <p>
         mcp-server-directory.com is a community-driven platform that collects and organizes
-        third-party MCP Servers. It serves as a central directory where users
-        can discover, share, and learn about various MCP Servers available for
+        MCP Servers and Clients. It serves as a central directory where users
+        can discover, share, and learn about various MCP implementations available for
         AI applications.
       </p>
     ),
   },
   {
     id: 8,
-    question: "How can I submit my MCP Server to mcp-server-directory.com?",
+    question: "How can I submit to the MCP Directory?",
     answer: (
       <p>
-        You can submit your MCP Server by creating a new issue in our GitHub
-        repository. Click the Submit button in the navigation bar or visit our
-        GitHub issues page directly. Please provide details about your server
-        including its name, description, features, and connection information.
+        You can submit your MCP Server or Client through our submission form. 
+        Click the Submit button in the navigation bar and fill out the required 
+        information. You&apos;ll need to specify whether you&apos;re submitting a server 
+        or client, along with details including its name, description, features, 
+        and connection information.
       </p>
     ),
   },
@@ -134,7 +135,7 @@ export default function FaqSection({ hideTitle = false }: FaqSectionProps) {
               FAQ
             </h2>
             <p className="mt-2 sm:mt-4 max-w-[700px] text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground">
-              Frequently Asked Questions about MCP Servers
+              Frequently Asked Questions about MCP
             </p>
           </div>
         )}

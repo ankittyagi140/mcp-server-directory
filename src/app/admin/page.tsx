@@ -53,7 +53,7 @@ export default function AdminPage() {
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
         <p className="text-muted-foreground">
-          Manage server submissions and blog content.
+          Manage server and client submissions and blog content.
         </p>
       </div>
       
@@ -82,6 +82,7 @@ export default function AdminPage() {
             </Link>
           </div>
         </div>
+        
       </div>
       
       <Suspense fallback={<AdminLoading />}>

@@ -3,16 +3,16 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Submission Successful | MCP Server Directory",
-  description: "Your Model Context Protocol server has been successfully submitted for review. Thank you for contributing to the MCP community.",
-  keywords: ["MCP submission success", "Model Context Protocol", "server submitted", "submission confirmation"],
+  title: "Submission Successful | MCP Directory",
+  description: "Your Model Context Protocol submission has been successfully submitted for review. Thank you for contributing to the MCP community.",
+  keywords: ["MCP submission success", "Model Context Protocol", "submission confirmation"],
   robots: {
     index: false,
     follow: true,
   },
   openGraph: {
-    title: "Submission Successful | MCP Server Directory",
-    description: "Your Model Context Protocol server has been successfully submitted for review.",
+    title: "Submission Successful | MCP Directory",
+    description: "Your Model Context Protocol submission has been successfully submitted for review.",
     type: "website",
   },
 };
@@ -27,7 +27,7 @@ export default function SubmitSuccessPage() {
           </div>
           <h1 className="text-2xl font-bold">Submission Successful!</h1>
           <p className="mt-2 text-muted-foreground">
-            Thank you for submitting your MCP server. Our team will review your submission and you&apos;ll be notified when the status changes.
+            Thank you for your submission to the MCP Directory. Our team will review your submission and you&apos;ll be notified when the status changes.
           </p>
           <div className="mt-6 space-y-4">
             <Link
@@ -36,12 +36,20 @@ export default function SubmitSuccessPage() {
             >
               Track My Submissions
             </Link>
-            <Link
-              href="/servers"
-              className="inline-flex h-12 w-full items-center justify-center rounded-full border border-gray-300 bg-white px-8 text-base font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-50 hover:scale-105 transform duration-200"
-            >
-              Browse Servers
-            </Link>
+            <div className="flex space-x-3">
+              <Link
+                href="/servers"
+                className="inline-flex h-12 w-full items-center justify-center rounded-full border border-gray-300 bg-white px-8 text-base font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-50 hover:scale-105 transform duration-200"
+              >
+                Browse Servers
+              </Link>
+              <Link
+                href="/clients"
+                className="inline-flex h-12 w-full items-center justify-center rounded-full border border-gray-300 bg-white px-8 text-base font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-50 hover:scale-105 transform duration-200"
+              >
+                Browse Clients
+              </Link>
+            </div>
             <Link
               href="/"
               className="inline-flex h-12 w-full items-center justify-center text-base font-medium text-gray-500 hover:text-gray-700"
