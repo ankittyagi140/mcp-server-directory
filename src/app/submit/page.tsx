@@ -15,7 +15,7 @@ export default function SubmitPage() {
   // Redirect unauthenticated users to login
   useEffect(() => {
     if (!isLoading && !user) {
-      toast.error("You must be signed in to submit a server");
+      toast.error("You must be signed in to submit a server or client");
       router.push("/login?redirect=/submit");
     }
   }, [user, isLoading, router]);
@@ -39,7 +39,7 @@ export default function SubmitPage() {
         <div className="mx-auto max-w-3xl text-center p-6 md:p-8 bg-white rounded-xl shadow-sm border border-slate-100">
           <ShieldAlert className="h-12 w-12 md:h-16 md:w-16 mx-auto mb-3 md:mb-4 text-amber-500" />
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2 md:mb-4">Authentication Required</h1>
-          <p className="mb-6 text-slate-600 text-sm md:text-base max-w-md mx-auto">You need to be signed in to submit a server to the MCP Directory.</p>
+          <p className="mb-6 text-slate-600 text-sm md:text-base max-w-md mx-auto">You need to be signed in to submit to the MCP Directory.</p>
           <Link 
             href="/login?redirect=/submit" 
             className="w-full sm:w-auto inline-flex h-10 md:h-12 items-center justify-center rounded-full bg-green-600 px-6 sm:px-8 text-sm md:text-base font-medium text-white shadow-lg transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 z-10 relative"
@@ -56,9 +56,9 @@ export default function SubmitPage() {
     <div className="container mx-auto px-4 py-12">
       <div className="mx-auto max-w-3xl">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">Submit a Server</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Submit to Directory</h1>
           <p className="mt-2 text-muted-foreground">
-            Share your MCP server with the community.
+            Share your MCP server or client with the community.
           </p>
         </div>
         

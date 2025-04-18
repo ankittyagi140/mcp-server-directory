@@ -1,19 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ExternalLink, Mail, Server, Github } from "lucide-react";
-import { supabase, getServerBySlug, generateSlug } from "@/lib/supabase";
-import type { ServerEntry } from "@/lib/supabase";
+import { ExternalLink, Mail, Laptop, Github } from "lucide-react";
+import { supabase, getClientBySlug, generateSlug } from "@/lib/supabase";
+import type { ClientEntry } from "@/lib/supabase";
 import type { Metadata } from "next";
 import Script from "next/script";
-import ServerCard from "@/components/ServerCard";
+import ClientCard from "@/components/ClientCard";
 import ShareButtons from "../../../components/ShareButtons";
 
-// Ensure tags and features are always arrays
-function normalizeArrayData(data: Omit<ServerEntry, 'tags' | 'features'> & { 
+// Ensure tags, capabilities and compatibility are always arrays
+function normalizeArrayData(data: Omit<ClientEntry, 'tags' | 'capabilities' | 'compatibility'> & { 
   tags?: string[] | string | null;
-  features?: string[] | string | null; 
-}): ServerEntry {
+  capabilities?: string[] | string | null;
+  compatibility?: string[] | string | null;
+}): ClientEntry {
   return {
     ...data,
     tags: Array.isArray(data.tags) 
@@ -21,10 +22,15 @@ function normalizeArrayData(data: Omit<ServerEntry, 'tags' | 'features'> & {
       : typeof data.tags === 'string' 
         ? JSON.parse(data.tags)
         : [],
-    features: Array.isArray(data.features) 
-      ? data.features 
-      : typeof data.features === 'string' 
-          ? JSON.parse(data.features)
+    capabilities: Array.isArray(data.capabilities) 
+      ? data.capabilities 
+      : typeof data.capabilities === 'string' 
+          ? JSON.parse(data.capabilities)
+          : [],
+    compatibility: Array.isArray(data.compatibility) 
+      ? data.compatibility 
+      : typeof data.compatibility === 'string' 
+          ? JSON.parse(data.compatibility)
           : [],
   };
 }
@@ -35,35 +41,35 @@ interface Props {
   }>;
 }
 
-// Helper to get server by ID or slug
-async function getServerByIdOrSlug(slug: string): Promise<ServerEntry | null> {
+// Helper to get client by ID or slug
+async function getClientByIdOrSlug(slug: string): Promise<ClientEntry | null> {
   const isNumeric = /^\d+$/.test(slug);
   
   if (isNumeric) {
-    // Get server by ID
+    // Get client by ID
     try {
       const { data, error } = await supabase
-        .from("servers")
+        .from("clients")
         .select("*")
         .eq("id", slug)
         .eq("status", "approved")
         .single();
         
       if (error || !data) {
-        console.error("Error fetching server by ID:", error);
+        console.error("Error fetching client by ID:", error);
         return null;
       }
       
       return normalizeArrayData(data);
     } catch (error) {
-      console.error("Error fetching server by ID:", error);
+      console.error("Error fetching client by ID:", error);
       return null;
     }
   } else {
-    // Get server by slug
-    const server = await getServerBySlug(slug);
-    if (server) {
-      return normalizeArrayData(server);
+    // Get client by slug
+    const client = await getClientBySlug(slug);
+    if (client) {
+      return normalizeArrayData(client);
     }
     return null;
   }
@@ -75,50 +81,50 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   
   if (!slug) {
     return {
-      title: "Server Not Found | MCP Server Directory",
-      description: "The requested MCP server could not be found.",
+      title: "Client Not Found | MCP Client Directory",
+      description: "The requested MCP client could not be found.",
     };
   }
 
-  const server = await getServerByIdOrSlug(slug);
+  const client = await getClientByIdOrSlug(slug);
   
-  if (!server) {
+  if (!client) {
     return {
-      title: "Server Not Found | MCP Server Directory",
-      description: "The requested MCP server could not be found.",
+      title: "Client Not Found | MCP Client Directory",
+      description: "The requested MCP client could not be found.",
     };
   }
   
   // Create proper slug for canonical URL
-  const serverSlug = generateSlug(server.name);
+  const clientSlug = generateSlug(client.name);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mcp-server-directory.com';
-  const canonicalUrl = `${baseUrl}/servers/${serverSlug}`;
+  const canonicalUrl = `${baseUrl}/clients/${clientSlug}`;
   
   // Truncate description safely
-  const metaDescription = server.description?.length > 160 
-    ? `${server.description.substring(0, 157)}...` 
-    : server.description || '';
+  const metaDescription = client.description?.length > 160 
+    ? `${client.description.substring(0, 157)}...` 
+    : client.description || '';
   
   return {
-    title: `${server.name} | MCP Server Directory`,
+    title: `${client.name} | MCP Client Directory`,
     description: metaDescription,
-    keywords: ["MCP server", "Model Context Protocol", ...server.tags, ...(server.features || [])],
+    keywords: ["MCP client", "Model Context Protocol", ...client.tags, ...(client.capabilities || [])],
     openGraph: {
-      title: `${server.name} - Model Context Protocol Server`,
+      title: `${client.name} - Model Context Protocol Client`,
       description: metaDescription,
       type: "website",
       url: canonicalUrl,
-      siteName: "MCP Server Directory",
-      images: server.logo_url ? [{ 
-        url: server.logo_url,
-        alt: `${server.name} logo`
+      siteName: "MCP Client Directory",
+      images: client.logo_url ? [{ 
+        url: client.logo_url,
+        alt: `${client.name} logo`
       }] : undefined,
     },
     twitter: {
       card: "summary",
-      title: `${server.name} | MCP Server`,
+      title: `${client.name} | MCP Client`,
       description: metaDescription,
-      images: server.logo_url ? [server.logo_url] : undefined,
+      images: client.logo_url ? [client.logo_url] : undefined,
     },
     alternates: {
       canonical: canonicalUrl
@@ -126,20 +132,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Generate static paths for all server slugs and IDs
+// Generate static paths for all client slugs and IDs
 export async function generateStaticParams() {
   try {
     const { data } = await supabase
-      .from("servers")
+      .from("clients")
       .select("id, name")
       .eq("status", "approved");
     
     if (!data) return [];
     
-    // Generate paths for all server slugs and IDs
-    return data.flatMap(server => [
-      { slug: String(server.id) },
-      { slug: generateSlug(server.name) }
+    // Generate paths for all client slugs and IDs
+    return data.flatMap(client => [
+      { slug: String(client.id) },
+      { slug: generateSlug(client.name) }
     ]);
   } catch (err) {
     console.error("Error generating static paths:", err);
@@ -147,68 +153,68 @@ export async function generateStaticParams() {
   }
 }
 
-export default async function ServerPage({ params }: Props) {
-  const { slug } = await params;
-  const server = await getServerByIdOrSlug(slug);
+export default async function ClientPage({ params }: Props) {
+  const { slug } = await  params;
+  const client = await getClientByIdOrSlug(slug);
   
-  if (!server) {
+  if (!client) {
     notFound();
   }
 
   // Create slug for canonical URL
-  const serverSlug = generateSlug(server.name);
+  const clientSlug = generateSlug(client.name);
   
   // If this is a numeric ID, redirect to the slug version for better SEO
   if (/^\d+$/.test(slug)) {
-    redirect(`/servers/${serverSlug}`);
+    redirect(`/clients/${clientSlug}`);
   }
   
   // Only redirect if there's a significant difference between slugs
   // This prevents unnecessary redirects for minor differences or case variations
-  if (slug.toLowerCase() !== serverSlug.toLowerCase() && 
-      !serverSlug.toLowerCase().includes(slug.toLowerCase()) &&
-      !slug.toLowerCase().includes(serverSlug.toLowerCase())) {
-    redirect(`/servers/${serverSlug}`);
+  if (slug.toLowerCase() !== clientSlug.toLowerCase() && 
+      !clientSlug.toLowerCase().includes(slug.toLowerCase()) &&
+      !slug.toLowerCase().includes(clientSlug.toLowerCase())) {
+    redirect(`/clients/${clientSlug}`);
   }
 
-  // Create structured data for the server
+  // Create structured data for the client
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": server.name,
-    "description": server.description,
-    "applicationCategory": "AIApplication",
+    "name": client.name,
+    "description": client.description,
+    "applicationCategory": "AIClientApplication",
     "operatingSystem": "Cross-platform",
-    "url": server.endpoint_url,
-    "datePublished": server.created_at,
+    "url": client.client_url,
+    "datePublished": client.created_at,
     "offers": {
       "@type": "Offer",
       "price": "0",
       "priceCurrency": "USD",
       "availability": "https://schema.org/InStock"
     },
-    "keywords": server.tags.join(", "),
-    ...(server.logo_url && { "image": server.logo_url }),
-    ...(server.github_url && { "codeRepository": server.github_url })
+    "keywords": client.tags.join(", "),
+    ...(client.logo_url && { "image": client.logo_url }),
+    ...(client.github_url && { "codeRepository": client.github_url })
   };
 
-  // Get recommended servers
-  const { data: recommendedServers } = await supabase
-    .from("servers")
+  // Get recommended clients
+  const { data: recommendedClients } = await supabase
+    .from("clients")
     .select("*")
     .eq("status", "approved")
-    .neq("id", server.id) // Exclude current server
+    .neq("id", client.id) // Exclude current client
     .order("created_at", { ascending: false })
     .limit(9);
 
   return (
     <>
-      <Script id="server-structured-data" type="application/ld+json">
+      <Script id="client-structured-data" type="application/ld+json">
         {JSON.stringify(structuredData)}
       </Script>
       <div className="container mx-auto px-4 py-6 md:py-12">
         <Link 
-          href="/servers" 
+          href="/clients" 
           className="mb-4 md:mb-8 inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground"
         >
           <svg
@@ -225,16 +231,16 @@ export default async function ServerPage({ params }: Props) {
           >
             <polyline points="15 18 9 12 15 6" />
           </svg>
-          Back to servers
+          Back to clients
         </Link>
         
         <div className="grid grid-cols-1 gap-6 md:gap-8 md:grid-cols-3">
           <div className="md:col-span-2">
             <div className="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
-              {server.logo_url ? (
+              {client.logo_url ? (
                 <Image
-                  src={server.logo_url}
-                  alt={`${server.name} logo`}
+                  src={client.logo_url}
+                  alt={`${client.name} logo`}
                   width={64}
                   height={64}
                   className="rounded-md h-16 w-16 object-contain mx-auto sm:mx-0"
@@ -242,16 +248,16 @@ export default async function ServerPage({ params }: Props) {
                 />
               ) : (
                 <div className="flex h-16 w-16 items-center justify-center rounded-md bg-primary/10 mx-auto sm:mx-0">
-                  <Server className="h-8 w-8 text-green-600" />
+                  <Laptop className="h-8 w-8 text-blue-600" />
                 </div>
               )}
               <div className="text-center sm:text-left">
-                <h1 className="text-2xl md:text-3xl font-bold">{server.name}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold">{client.name}</h1>
                 <div className="mt-2 flex flex-wrap justify-center sm:justify-start gap-2">
-                  {server.tags.map((tag: string) => (
+                  {client.tags.map((tag: string) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center text-xs font-medium text-green-600 px-1"
+                      className="inline-flex items-center text-xs font-medium text-blue-600 px-1"
                     >
                       #{tag}
                     </span>
@@ -262,30 +268,41 @@ export default async function ServerPage({ params }: Props) {
             
             <div className="mb-4 md:mb-6 rounded-lg border p-4 md:p-6">
               <h2 className="mb-2 md:mb-4 text-lg md:text-xl font-semibold">Description</h2>
-              <p className="text-sm md:text-base text-muted-foreground">{server.description}</p>
+              <p className="text-sm md:text-base text-muted-foreground">{client.description}</p>
             </div>
             
-            {server.features && server.features.length > 0 && (
+            {client.capabilities && client.capabilities.length > 0 && (
               <div className="mb-4 md:mb-6 rounded-lg border p-4 md:p-6">
-                <h2 className="mb-2 md:mb-4 text-lg md:text-xl font-semibold">Features</h2>
+                <h2 className="mb-2 md:mb-4 text-lg md:text-xl font-semibold">Capabilities</h2>
                 <ul className="ml-6 list-disc text-sm md:text-base text-muted-foreground">
-                  {server.features.map((feature, index) => (
-                    <li key={index} className="mb-1">{feature}</li>
+                  {client.capabilities.map((capability, index) => (
+                    <li key={index} className="mb-1">{capability}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {client.compatibility && client.compatibility.length > 0 && (
+              <div className="mb-4 md:mb-6 rounded-lg border p-4 md:p-6">
+                <h2 className="mb-2 md:mb-4 text-lg md:text-xl font-semibold">Compatible With</h2>
+                <ul className="ml-6 list-disc text-sm md:text-base text-muted-foreground">
+                  {client.compatibility.map((compatible, index) => (
+                    <li key={index} className="mb-1">{compatible}</li>
                   ))}
                 </ul>
               </div>
             )}
             
             <div className="mb-4 md:mb-6 rounded-lg border p-4 md:p-6">
-              <h2 className="mb-2 md:mb-4 text-lg md:text-xl font-semibold">Endpoint URL</h2>
+              <h2 className="mb-2 md:mb-4 text-lg md:text-xl font-semibold">Download URL</h2>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-md bg-muted p-3">
-                <code className="text-xs sm:text-sm break-all mb-2 sm:mb-0">{server.endpoint_url}</code>
+                <code className="text-xs sm:text-sm break-all mb-2 sm:mb-0">{client.client_url}</code>
                 <a
-                  href={server.endpoint_url}
+                  href={client.client_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-background ml-auto"
-                  aria-label="Open endpoint URL"
+                  aria-label="Open client URL"
                 >
                   <ExternalLink className="h-4 w-4" />
                 </a>
@@ -296,21 +313,21 @@ export default async function ServerPage({ params }: Props) {
           <div className="rounded-lg border p-4 md:p-6 md:sticky md:top-24">
             <h2 className="mb-3 md:mb-4 text-lg md:text-xl font-semibold">Links & Contact</h2>
             <div className="space-y-3 md:space-y-4">
-              {server.github_url && (
+              {client.github_url && (
                 <a
-                  href={server.github_url}
+                  href={client.github_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                 >
                   <Github className="h-4 w-4 flex-shrink-0" />
-                  <span className="break-all">{server.github_url.replace("https://github.com/", "")}</span>
+                  <span className="break-all">{client.github_url.replace("https://github.com/", "")}</span>
                 </a>
               )}
               
-              {server.twitter_url && (
+              {client.twitter_url && (
                 <a
-                  href={server.twitter_url}
+                  href={client.twitter_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
@@ -322,9 +339,9 @@ export default async function ServerPage({ params }: Props) {
                 </a>
               )}
               
-              {server.reddit_url && (
+              {client.reddit_url && (
                 <a
-                  href={server.reddit_url}
+                  href={client.reddit_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
@@ -340,9 +357,9 @@ export default async function ServerPage({ params }: Props) {
                 </a>
               )}
               
-              {server.linkedin_url && (
+              {client.linkedin_url && (
                 <a
-                  href={server.linkedin_url}
+                  href={client.linkedin_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
@@ -356,9 +373,9 @@ export default async function ServerPage({ params }: Props) {
                 </a>
               )}
               
-              {server.instagram_url && (
+              {client.instagram_url && (
                 <a
-                  href={server.instagram_url}
+                  href={client.instagram_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
@@ -372,34 +389,34 @@ export default async function ServerPage({ params }: Props) {
                 </a>
               )}
               
-              {server.contact_email && (
+              {client.contact_email && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Mail className="h-4 w-4 flex-shrink-0" />
-                  <span className="break-all">{server.contact_email === "aki.tyagi1991@gmail.com" || server.contact_email === "mcpserverdirectory@gmail.com" ? "Contact me on GitHub" : server.contact_email}</span>
+                  <span className="break-all">{client.contact_email === "aki.tyagi1991@gmail.com" || client.contact_email === "mcpserverdirectory@gmail.com" ? "Contact me on GitHub" : client.contact_email}</span>
                 </div>
               )}
               
               <div className="pt-3 md:pt-4">
                 <span className="text-xs text-muted-foreground">
-                  Added on {new Date(server.created_at).toLocaleDateString()}
+                  Added on {new Date(client.created_at).toLocaleDateString()}
                 </span>
               </div>
             </div>
             
             {/* Social Sharing */}
             <div className="mt-4 pt-4 border-t border-gray-100">
-              <p className="text-sm font-medium mb-2">Share this server:</p>
-              <ShareButtons title={server.name} slug={slug} />
+              <p className="text-sm font-medium mb-2">Share this client:</p>
+              <ShareButtons title={client.name} slug={slug} />
             </div>
           </div>
         </div>
 
         {/* Recommendations Section */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-6">Recommended Servers</h2>
+          <h2 className="text-2xl font-bold mb-6">Recommended Clients</h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {recommendedServers?.map((recommendedServer) => (
-              <ServerCard key={recommendedServer.id} server={recommendedServer} />
+            {recommendedClients?.map((recommendedClient) => (
+              <ClientCard key={recommendedClient.id} client={recommendedClient} />
             ))}
           </div>
         </div>
