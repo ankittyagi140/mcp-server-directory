@@ -78,7 +78,7 @@ export default function Footer() {
                 <Twitter className="h-6 w-6" />
               </a>
               <a 
-                href="www.linkedin.com/in/atyagi-js" 
+                href="https://www.linkedin.com/in/atyagi-js" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-slate-300 hover:text-white transition-colors"
