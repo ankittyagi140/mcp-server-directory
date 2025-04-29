@@ -25,7 +25,7 @@ export default function ClientCard({ client }: ClientCardProps) {
       : [];
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow transition-all hover:shadow-md">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-card-foreground shadow-sm transition-all duration-300 hover:shadow-xl hover:border-blue-400 hover:-translate-y-1 hover:scale-[1.03] cursor-pointer">
       <div className="flex items-center justify-between p-6">
         <div className="flex items-center space-x-4">
           {client.logo_url && !imageError ? (
@@ -34,13 +34,13 @@ export default function ClientCard({ client }: ClientCardProps) {
               alt={`${client.name} logo`}
               width={40}
               height={40}
-              className="rounded-md"
+              className="rounded-md group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300"
               onError={() => setImageError(true)}
               unoptimized={true}
             />
           ) : (
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
-              <Laptop className="h-5 w-5 text-blue-600" />
+              <Laptop className="h-5 w-5 text-blue-600 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300" />
             </div>
           )}
           <div>
@@ -68,7 +68,7 @@ export default function ClientCard({ client }: ClientCardProps) {
           </span>
         ))}
       </div>
-      <div className="mt-auto flex justify-between items-center p-4 pt-2 border-t">
+      <div className="flex items-center justify-between border-t p-6">
         <Link
           href={`/clients/${clientSlug}`}
           className="text-sm font-medium hover:underline"
@@ -81,10 +81,10 @@ export default function ClientCard({ client }: ClientCardProps) {
               href={client.github_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted group-hover:bg-blue-50 transition-colors"
               aria-label="GitHub repository"
             >
-              <Github className="h-4 w-4" />
+              <Github className="h-4 w-4 group-hover:scale-110 group-hover:text-blue-600 transition-transform duration-300" />
             </a>
           )}
           {client.client_url && (
@@ -92,10 +92,10 @@ export default function ClientCard({ client }: ClientCardProps) {
               href={client.client_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-muted group-hover:bg-blue-50 transition-colors"
               aria-label="Client website"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4 group-hover:scale-110 group-hover:text-blue-600 transition-transform duration-300" />
             </a>
           )}
         </div>
