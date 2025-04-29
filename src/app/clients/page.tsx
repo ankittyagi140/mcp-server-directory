@@ -8,10 +8,10 @@ import type { ClientEntry } from "@/lib/supabase";
 
 // Export metadata for SEO
 export const metadata: Metadata = {
-  title: "MCP Clients | Find and Download Model Context Protocol Clients | MCP Directory",
+  title: "MCP Clients | Find and Download Model Context Protocol Clients | MCP Clients Directory",
   description:
     "Browse and download MCP clients. Find the perfect Model Context Protocol client for your AI applications.",
-  keywords: "MCP clients, Model Context Protocol clients, AI clients, MCP compatible clients",
+  keywords: "MCP clients, Model Context Protocol clients, AI clients, MCP compatible clients, MCP clients directory",
   openGraph: {
     title: "Browse MCP Clients | Model Context Protocol Directory",
     description: "Find the perfect Model Context Protocol client for your AI applications. Filter by capabilities, compatibility, and more.",
@@ -67,7 +67,7 @@ export default async function ClientsPage({ searchParams }: Props) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
+      <div className="mb-8 text-center">
         <h1 className="text-4xl font-bold mb-4">Model Context Protocol Clients</h1>
         <p className="text-lg text-gray-600">
           Discover and download the best Model Context Protocol clients

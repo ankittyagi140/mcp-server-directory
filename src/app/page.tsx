@@ -2,8 +2,15 @@ import Link from "next/link";
 import { ArrowRight, Server, Star, Shield, LineChart, Settings, Bell, LayoutDashboard } from "lucide-react";
 import FaqSection from "@/components/FaqSection";
 import Script from "next/script";
+import { supabase } from "@/lib/supabase";
 
-export default function Home() {
+export default async function Home() {
+  // Fetch live counts
+  const [{ count: serverCount }, { count: clientCount }] = await Promise.all([
+    supabase.from("servers").select("id", { count: "exact", head: true }).eq("status", "approved"),
+    supabase.from("clients").select("id", { count: "exact", head: true }).eq("status", "approved"),
+  ]);
+
   // Define the FAQ items for structured data
   const faqItems = [
     {
@@ -177,23 +184,36 @@ export default function Home() {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2 sm:space-y-4 max-w-4xl">
+              <div className="mb-2">
+                <span className="inline-block rounded-full bg-green-100 px-4 py-1 text-xs sm:text-sm font-semibold text-green-700 tracking-wide uppercase shadow-sm">
+                  The best mcp server directory
+                </span>
+              </div>
               <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight">
-                MCP <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">Directory</span>
+                MCP Server <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">Directory</span>
               </h1>
               <p className="mx-auto max-w-[800px] text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-slate-700 px-1">
                 Discover and share Model Context Protocol Servers and Clients for AI applications, development, and integration.
               </p>
+              <div className="flex flex-wrap justify-center gap-3 mt-2">
+                <span className="inline-block rounded-full bg-green-50 px-4 py-1 text-xs sm:text-sm font-semibold text-green-700 border border-green-200">
+                  {serverCount ?? 0} MCP Servers
+                </span>
+                <span className="inline-block rounded-full bg-blue-50 px-4 py-1 text-xs sm:text-sm font-semibold text-blue-700 border border-blue-200">
+                  {clientCount ?? 0} MCP Clients
+                </span>
+              </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 mt-6 w-full max-w-md mx-auto z-10 relative">
               <Link 
                 href="/servers" 
-                className="w-full sm:w-auto inline-flex h-11 md:h-12 items-center justify-center rounded-full bg-green-600 px-5 sm:px-8 text-sm sm:text-base font-medium text-white shadow-lg transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 touch-manipulation z-10 relative"
+                className="w-full sm:w-auto min-w-[160px] inline-flex h-11 md:h-12 items-center justify-center rounded-full bg-green-600 px-5 sm:px-8 text-sm sm:text-base font-medium text-white shadow-lg transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 touch-manipulation z-10 relative"
               >
                 Browse Directory <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
               <Link 
                 href="/submit" 
-                className="w-full sm:w-auto inline-flex h-11 md:h-12 items-center justify-center rounded-full bg-white border border-slate-200 px-5 sm:px-8 text-sm sm:text-base font-medium text-slate-800 shadow-lg transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2 touch-manipulation z-10 relative"
+                className="w-full sm:w-auto min-w-[160px] inline-flex h-11 md:h-12 items-center justify-center rounded-full border-2 border-green-600 bg-white px-5 sm:px-8 text-sm sm:text-base font-semibold text-green-700 shadow-lg transition-colors hover:bg-green-50 hover:border-green-700 hover:text-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 touch-manipulation z-10 relative"
               >
                 Submit
               </Link>
@@ -345,13 +365,13 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto z-10 relative mt-2">
               <Link 
                 href="/servers" 
-                className="w-full sm:w-auto inline-flex h-11 md:h-12 items-center justify-center rounded-full bg-green-600 px-5 sm:px-8 text-sm sm:text-base font-medium text-white shadow-lg transition-colors hover:bg-green-700 z-10 relative"
+                className="w-full sm:w-auto min-w-[160px] inline-flex h-11 md:h-12 items-center justify-center rounded-full bg-green-600 px-5 sm:px-8 text-sm sm:text-base font-medium text-white shadow-lg transition-colors hover:bg-green-700 z-10 relative"
               >
                 Browse Directory <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
               <Link 
                 href="/submit" 
-                className="w-full sm:w-auto inline-flex h-11 md:h-12 items-center justify-center rounded-full bg-white border border-slate-200 px-5 sm:px-8 text-sm sm:text-base font-medium text-slate-800 shadow-lg transition-colors hover:bg-slate-50 z-10 relative"
+                className="w-full sm:w-auto min-w-[160px] inline-flex h-11 md:h-12 items-center justify-center rounded-full border-2 border-green-600 bg-white px-5 sm:px-8 text-sm sm:text-base font-semibold text-green-700 shadow-lg transition-colors hover:bg-green-50 hover:border-green-700 hover:text-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 touch-manipulation z-10 relative"
               >
                 Submit
               </Link>
