@@ -3,8 +3,10 @@ import Link from "next/link";
 import ServerCard from "@/components/ServerCard";
 import PaginationControls from "@/components/PaginationControls";
 import SearchForm from "@/components/SearchForm";
+import SortDropdown from "@/components/ServerFilter";
 import type { Metadata } from "next";
 import type { ServerEntry } from "@/lib/supabase";
+import Script from "next/script";
 
 // Export metadata for SEO
 export const metadata: Metadata = {
@@ -21,15 +23,26 @@ export const metadata: Metadata = {
 
 const ITEMS_PER_PAGE = 12;
 
-async function getServers(page: number, searchQuery?: string) {
+// Define sort options and their corresponding Supabase sorting configurations
+const SORT_OPTIONS = {
+  "latest": { column: "created_at", ascending: false },
+  "oldest": { column: "created_at", ascending: true },
+  "a-z": { column: "name", ascending: true },
+  "z-a": { column: "name", ascending: false },
+};
+
+async function getServers(page: number, searchQuery?: string, sortOption?: string) {
   const from = (page - 1) * ITEMS_PER_PAGE;
   const to = from + ITEMS_PER_PAGE - 1;
+
+  // Default sort is by latest (created_at descending)
+  const sort = SORT_OPTIONS[sortOption as keyof typeof SORT_OPTIONS] || SORT_OPTIONS.latest;
 
   let query = supabase
     .from("servers")
     .select("*", { count: "exact" })
     .eq("status", "approved")
-    .order("created_at", { ascending: false })
+    .order(sort.column, { ascending: sort.ascending })
     .range(from, to);
 
   if (searchQuery && searchQuery.trim()) {
@@ -56,17 +69,67 @@ interface Props {
 }
 
 export default async function ServersPage({ searchParams }: Props) {
-  const {page, search} = await searchParams;
+  const {page, search, sort} = await searchParams;
   const currentPage = Number(page) || 1;
   const searchQuery = search as string;
-  const { servers, totalCount } = await getServers(currentPage, searchQuery);
+  const sortOption = sort as string;
+  
+  const { servers, totalCount } = await getServers(currentPage, searchQuery, sortOption);
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
-  // Generate base URL for pagination
-  const baseUrl = searchQuery ? `/servers?search=${encodeURIComponent(searchQuery)}` : "/servers";
+  // Generate base URL for pagination that includes both search and sort params if present
+  let baseUrl = "/servers";
+  const params = new URLSearchParams();
+  if (searchQuery) params.set("search", searchQuery);
+  if (sortOption) params.set("sort", sortOption);
+  if (params.toString()) baseUrl += `?${params.toString()}`;
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Script
+  id="structured-data"
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "MCP Servers Directory",
+      url: "https://www.mcp-server-directory.com/servers",
+      description:
+        "Browse and join MCP servers. Find the perfect Model Context Protocol server for your needs.",
+      breadcrumb: {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: "https://www.mcp-server-directory.com"
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Servers",
+            item: "https://www.mcp-server-directory.com/servers"
+          }
+        ]
+      },
+      mainEntity: {
+        "@type": "ItemList",
+        name: "MCP Servers",
+        numberOfItems: totalCount,
+        itemListElement: servers.map((server, index) => ({
+          "@type": "ListItem",
+          position: index + 1 + (currentPage - 1) * ITEMS_PER_PAGE,
+          url: `https://www.mcp-server-directory.com/servers/${server.slug || server.id}`,
+          name: server.name,
+          description: server.description
+        }))
+      }
+    })
+  }}
+/>
+
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-bold mb-4">Model Context Protocol Servers</h1>
         <p className="text-lg text-gray-600">
@@ -75,8 +138,16 @@ export default async function ServersPage({ searchParams }: Props) {
       </div>
 
       <div className="mb-8">
-        <SearchForm />
-        {searchQuery && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+          <div className="flex-grow">
+            <SearchForm currentSort={sortOption} />
+          </div>
+          <div className="sm:flex-shrink-0">
+            <SortDropdown currentSort={sortOption} currentSearch={searchQuery} />
+          </div>
+        </div>
+        
+        {(searchQuery || sortOption) && (
           <div className="mt-4 text-center">
             <Link
               href="/servers"

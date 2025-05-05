@@ -3,13 +3,45 @@ import { ArrowRight, Server, Star, Shield, LineChart, Settings, Bell, LayoutDash
 import FaqSection from "@/components/FaqSection";
 import Script from "next/script";
 import { supabase } from "@/lib/supabase";
+import { cache } from "react";
+import { headers } from "next/headers";
+
+// Create a cached fetch function with revalidation for count queries
+const getCounts = cache(async () => {
+  // Force dynamic rendering by reading headers
+  headers();
+  
+  try {
+    const [serverResponse, clientResponse] = await Promise.all([
+      supabase
+        .from("servers")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "approved")
+        .throwOnError(),
+      
+      supabase
+        .from("clients")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "approved")
+        .throwOnError(),
+    ]);
+
+    return {
+      serverCount: serverResponse.count ?? 0,
+      clientCount: clientResponse.count ?? 0
+    };
+  } catch (error) {
+    console.error("Error fetching counts:", error);
+    return { serverCount: 0, clientCount: 0 };
+  }
+});
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function Home() {
   // Fetch live counts
-  const [{ count: serverCount }, { count: clientCount }] = await Promise.all([
-    supabase.from("servers").select("id", { count: "exact", head: true }).eq("status", "approved"),
-    supabase.from("clients").select("id", { count: "exact", head: true }).eq("status", "approved"),
-  ]);
+  const { serverCount, clientCount } = await getCounts();
 
   // Define the FAQ items for structured data
   const faqItems = [
@@ -197,10 +229,10 @@ export default async function Home() {
               </p>
               <div className="flex flex-wrap justify-center gap-3 mt-2">
                 <span className="inline-block rounded-full bg-green-50 px-4 py-1 text-xs sm:text-sm font-semibold text-green-700 border border-green-200">
-                  {serverCount ?? 0} MCP Servers
+                  {serverCount} MCP Servers
                 </span>
                 <span className="inline-block rounded-full bg-blue-50 px-4 py-1 text-xs sm:text-sm font-semibold text-blue-700 border border-blue-200">
-                  {clientCount ?? 0} MCP Clients
+                  {clientCount} MCP Clients
                 </span>
               </div>
             </div>
