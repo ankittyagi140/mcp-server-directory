@@ -106,15 +106,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : client.description || '';
   
   return {
-    title: `${client.name} | MCP Client Directory`,
+    title: `${client.name} | MCP Clients Directory`,
     description: metaDescription,
-    keywords: ["MCP client", "Model Context Protocol", ...client.tags, ...(client.capabilities || [])],
+    keywords: ["MCP clients", "Model Context Protocol", ...client.tags, ...(client.capabilities || [])],
     openGraph: {
       title: `${client.name} - Model Context Protocol Client`,
       description: metaDescription,
       type: "website",
       url: canonicalUrl,
-      siteName: "MCP Client Directory",
+      siteName: "MCP Clients Directory",
       images: client.logo_url ? [{ 
         url: client.logo_url,
         alt: `${client.name} logo`
