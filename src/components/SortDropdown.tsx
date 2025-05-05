@@ -2,13 +2,14 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ArrowUpDown } from "lucide-react";
+import React from "react";
 
-interface SortDropdownProps {
+export interface SortDropdownProps {
   currentSort?: string;
   currentSearch?: string;
 }
 
-export default function SortDropdown({ currentSort, currentSearch }: SortDropdownProps) {
+const SortDropdown: React.FC<SortDropdownProps> = ({ currentSort, currentSearch }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -60,4 +61,6 @@ export default function SortDropdown({ currentSort, currentSearch }: SortDropdow
       </div>
     </div>
   );
-} 
+};
+
+export default SortDropdown; 

@@ -3,7 +3,7 @@ import Link from "next/link";
 import ServerCard from "@/components/ServerCard";
 import PaginationControls from "@/components/PaginationControls";
 import SearchForm from "@/components/SearchForm";
-import SortDropdown from "@/components/ServerFilter";
+import SortDropdown from "@/components/SortDropdown";
 import type { Metadata } from "next";
 import type { ServerEntry } from "@/lib/supabase";
 import Script from "next/script";

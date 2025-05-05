@@ -2,12 +2,14 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState } from "react";
+import React from "react";
+import { Search } from "lucide-react";
 
-interface SearchFormProps {
+export interface SearchFormProps {
   currentSort?: string;
 }
 
-export default function SearchForm({ currentSort }: SearchFormProps) {
+const SearchForm: React.FC<SearchFormProps> = ({ currentSort }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -35,6 +37,7 @@ export default function SearchForm({ currentSort }: SearchFormProps) {
     <form onSubmit={handleSubmit} className="w-full">
       <div className="relative flex flex-col sm:flex-row gap-2">
         <div className="relative flex-grow">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             value={query}
@@ -52,4 +55,6 @@ export default function SearchForm({ currentSort }: SearchFormProps) {
       </div>
     </form>
   );
-} 
+};
+
+export default SearchForm; 
