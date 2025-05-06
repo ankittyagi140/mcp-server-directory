@@ -14,10 +14,37 @@ export const metadata: Metadata = {
   description:
     "Browse and join MCP servers. Find the perfect Model Context Protocol server for your playstyle.",
   keywords: "MCP servers, Model Context Protocol servers, server list, join server",
+  authors: [{ name: "MCP Server Directory Team" }],
+  creator: "MCP Server Directory",
+  publisher: "MCP Server Directory",
   openGraph: {
     title: "Browse MCP Servers | Model Context Protocol Directory",
     description: "Find the perfect Model Context Protocol server for your AI applications. Filter by tags, features, and more.",
     type: "website",
+    url: "https://mcp-server-directory.com/servers",
+    siteName: "MCP Server Directory",
+    images: [
+      {
+        url: "/mcp-server-directory.png",
+        width: 478,
+        height: 480,
+        alt: "MCP Server Directory Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Browse MCP Servers | Model Context Protocol Directory",
+    description: "Find the perfect Model Context Protocol server for your AI applications. Filter by tags, features, and more.",
+    images: ["/mcp-server-directory.png"],
+    creator: "@mcpserverdirectory",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: "/servers",
   },
 };
 

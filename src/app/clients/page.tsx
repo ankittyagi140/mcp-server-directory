@@ -14,10 +14,37 @@ export const metadata: Metadata = {
   description:
     "Browse and download MCP clients. Find the perfect Model Context Protocol client for your AI applications.",
   keywords: "MCP clients, Model Context Protocol clients, AI clients, MCP compatible clients, MCP clients directory,MCP clients list",
+  authors: [{ name: "MCP Server Directory Team" }],
+  creator: "MCP Server Directory",
+  publisher: "MCP Server Directory",
   openGraph: {
     title: "Browse MCP Clients | Model Context Protocol Directory",
     description: "Find the perfect Model Context Protocol client for your AI applications. Filter by capabilities, compatibility, and more.",
     type: "website",
+    url: "https://mcp-server-directory.com/clients",
+    siteName: "MCP Server Directory",
+    images: [
+      {
+        url: "/mcp-server-directory.png",
+        width: 478,
+        height: 480,
+        alt: "MCP Server Directory Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Browse MCP Clients | Model Context Protocol Directory",
+    description: "Find the perfect Model Context Protocol client for your AI applications. Filter by capabilities, compatibility, and more.",
+    images: ["/mcp-server-directory.png"],
+    creator: "@mcpserverdirectory",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: "/clients",
   },
 };
 
