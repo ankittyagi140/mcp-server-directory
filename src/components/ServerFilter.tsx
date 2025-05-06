@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search } from "lucide-react";
+// import { Search } from "lucide-react";
 
 const POPULAR_TAGS = [
   "authentication",
