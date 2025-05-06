@@ -8,6 +8,7 @@ import AuthProvider from '@/components/AuthProvider';
 import { Toaster } from "react-hot-toast";
 import AuthSuccess from '@/components/AuthSuccess';
 import RoleDisplay from '@/components/RoleDisplay';
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -93,6 +94,8 @@ export default function RootLayout({
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
         <meta name="google-site-verification" content="xgZR0c3YvTHe9t68xMEPrR4EjCkedhRvobbJmEYMevw" />
+        <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1332831285527693"
+     crossOrigin="anonymous"></Script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         <AuthProvider>
