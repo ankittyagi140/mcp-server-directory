@@ -1,6 +1,6 @@
-# MCP Server Directory - Your Ultimate Minecraft Protocol Server Discovery Platform
+# MCP Server Directory - Your Ultimate Model Context Protocol Server & clients Discovery Platform
 
-A comprehensive, user-friendly directory application for discovering, exploring, and managing Minecraft Protocol (MCP) servers. Our platform offers powerful search capabilities, advanced filtering options, and seamless server submission features to connect the MCP community.
+A comprehensive, user-friendly directory application for discovering, exploring, and managing Model Context Protocol (MCP) servers. Our platform offers powerful search capabilities, advanced filtering options, and seamless server submission features to connect the MCP community.
 
 ## Key Features
 
@@ -107,7 +107,7 @@ Join our growing community of MCP enthusiasts and server administrators. Your fe
 ## Acknowledgements
 
 Special thanks to:
-- The vibrant Minecraft community for their continuous innovation
+- The vibrant MCP community for their continuous innovation
 - All contributors to the open-source libraries that power this project
 - Our dedicated users and server administrators
 
