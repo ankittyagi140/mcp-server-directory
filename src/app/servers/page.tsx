@@ -14,9 +14,9 @@ export const metadata: Metadata = {
   description:
     "Browse and join MCP servers. Find the perfect Model Context Protocol server for your playstyle.",
   keywords: "MCP servers, Model Context Protocol servers, server list, join server",
-  authors: [{ name: "MCP Server Directory Team" }],
-  creator: "MCP Server Directory",
-  publisher: "MCP Server Directory",
+  authors: [{ name: "Ankit Tyagi" }],
+  creator: "www.linkedin.com/in/atyagi-js",
+  publisher: "www.linkedin.com/in/atyagi-js",
   openGraph: {
     title: "Browse MCP Servers | Model Context Protocol Directory",
     description: "Find the perfect Model Context Protocol server for your AI applications. Filter by tags, features, and more.",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: "Browse MCP Servers | Model Context Protocol Directory",
     description: "Find the perfect Model Context Protocol server for your AI applications. Filter by tags, features, and more.",
     images: ["/mcp-server-directory.png"],
-    creator: "@mcpserverdirectory",
+    creator: "www.linkedin.com/in/atyagi-js",
   },
   robots: {
     index: true,
@@ -158,9 +158,9 @@ export default async function ServersPage({ searchParams }: Props) {
 />
 
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-4">Model Context Protocol Servers</h1>
+        <h1 className="text-4xl font-bold mb-4">MCP Servers</h1>
         <p className="text-lg text-gray-600">
-          Discover and join the best Model Context Protocol servers
+          Discover and join the best MCP servers
         </p>
       </div>
 

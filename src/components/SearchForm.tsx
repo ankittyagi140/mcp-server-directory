@@ -43,7 +43,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ currentSort }) => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, description, or tags..."
-            className="w-full rounded-md border border-input bg-background p-2 sm:p-2.5 pl-10 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="w-full rounded-md border border-input bg-background p-2 pl-10 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
         <button

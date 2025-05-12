@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "settings": {
+    "enableNetwork": true,
+    "enableConsole": true,
+    "enableSources": true,
+    "enableElements": true
+  }
+} 
