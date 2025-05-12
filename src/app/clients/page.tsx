@@ -14,9 +14,9 @@ export const metadata: Metadata = {
   description:
     "Browse and download MCP clients. Find the perfect Model Context Protocol client for your AI applications.",
   keywords: "MCP clients, Model Context Protocol clients, AI clients, MCP compatible clients, MCP clients directory,MCP clients list",
-  authors: [{ name: "MCP Server Directory Team" }],
-  creator: "MCP Server Directory",
-  publisher: "MCP Server Directory",
+  authors: [{ name: "Ankit Tyagi" }],
+  creator: "www.linkedin.com/in/atyagi-js",
+  publisher: "www.linkedin.com/in/atyagi-js",
   openGraph: {
     title: "Browse MCP Clients | Model Context Protocol Directory",
     description: "Find the perfect Model Context Protocol client for your AI applications. Filter by capabilities, compatibility, and more.",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
         url: "/mcp-server-directory.png",
         width: 478,
         height: 480,
-        alt: "MCP Server Directory Logo",
+        alt: "MCP Clients Directory Logo",
       },
     ],
   },
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: "Browse MCP Clients | Model Context Protocol Directory",
     description: "Find the perfect Model Context Protocol client for your AI applications. Filter by capabilities, compatibility, and more.",
     images: ["/mcp-server-directory.png"],
-    creator: "@mcpserverdirectory",
+    creator: "www.linkedin.com/in/atyagi-js",
   },
   robots: {
     index: true,
@@ -157,9 +157,9 @@ export default async function ClientsPage({ searchParams }: Props) {
 />
 
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-4">Model Context Protocol Clients</h1>
+        <h1 className="text-4xl font-bold mb-4">MCP Clients</h1>
         <p className="text-lg text-gray-600">
-          Discover and download the best Model Context Protocol clients
+          Discover and download the best MCP clients
         </p>
       </div>
 
