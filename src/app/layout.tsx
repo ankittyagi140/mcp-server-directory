@@ -23,8 +23,8 @@ const geistMono = Geist_Mono({
 // Define logo path once with versioning
 
 export const metadata: Metadata = {
-  title: "MCP Server Directory | Find & Share Model Context Protocol Servers and Clients",
-  description: "Discover and share MCP Servers and Clients for AI applications. Browse a comprehensive directory of Model Context Protocol servers with search, filtering, and submission capabilities.",
+  title: "MCP Server Directory | Discover Model Context Protocol Servers",
+  description: "Discover and share MCP Servers and Clients for AI applications. Browse a comprehensive directory of Model Context Protocol servers with and submission capabilities.",
   keywords: ["MCP", "mcp server", "MCP Server Directory", "MCP clients", "MCP marketplace","MCP server marketplace","mcp client marketplace", "MCP server list", "MCP client list", "MCP clients directory", "Model Context Protocol", "MCP Servers", "Anthropic", "AI assistants", "server directory", "MCP integration"],
   authors: [{ name: "MCP Server Directory Team" }],
   openGraph: {
